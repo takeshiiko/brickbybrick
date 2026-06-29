@@ -481,6 +481,13 @@ button {
 }
 
 .odds-grid i,
+.rarity-thumb {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .rarity-dot {
   display: block;
   width: 10px;
@@ -950,6 +957,39 @@ body {
     linear-gradient(145deg, rgba(10, 17, 20, 0.96), rgba(4, 6, 6, 0.97));
   background-size: 14px 14px, 14px 14px, auto;
   box-shadow: 0 0 0 1px rgba(0,0,0,.62), inset 0 0 44px rgba(66,198,231,.035);
+}
+
+/* ── Progress arrows ─────────────────────────────────────────────────────── */
+.progress-arrows {
+  position: absolute;
+  bottom: var(--arrow-bottom, 50%);
+  width: 28px;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 4px;
+  z-index: 3;
+  pointer-events: none;
+  transition: bottom 0.6s ease;
+}
+
+.progress-arrows--left  { left: 14px; }
+.progress-arrows--right { right: 14px; }
+
+.progress-arrow {
+  display: block;
+  font-size: 11px;
+  color: var(--brick);
+  opacity: 0;
+  animation: arrow-rise var(--arrow-speed, 1.4s) ease-in-out var(--arrow-delay, 0s) infinite;
+  text-shadow: 0 0 6px rgba(200, 81, 44, 0.8);
+}
+
+@keyframes arrow-rise {
+  0%   { opacity: 0;   transform: translateY(6px); }
+  25%  { opacity: 1;   transform: translateY(0); }
+  75%  { opacity: 1;   transform: translateY(-12px); }
+  100% { opacity: 0;   transform: translateY(-20px); }
 }
 
 .house-progress-overlay {
@@ -1445,26 +1485,33 @@ body {
 }
 
 .my-bricks-card .gallery-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .nft-card {
-  min-height: 195px;
-  padding: 10px;
+  min-height: 160px;
+  padding: 8px;
+  text-align: center;
 }
 
 .card-topline {
   margin-top: 2px;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .card-brick-wrap {
-  min-height: 98px;
+  min-height: 70px;
+}
+
+.card-brick-wrap img,
+.card-brick-wrap canvas {
+  width: 80px !important;
+  height: 60px !important;
 }
 
 .nft-card h3 {
   font-family: "Courier New", monospace;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .nft-card p {
@@ -1892,6 +1939,83 @@ body {
   height: 100%;
   object-fit: contain;
   padding: 24px;
+}
+
+/* ── House About Section ─────────────────────────────────────────────────── */
+.house-about {
+  max-width: 1504px;
+  margin: 0 auto;
+  padding: 72px 48px 96px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+.house-about-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px 64px;
+}
+
+.house-about-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.house-about-tag {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--brick);
+}
+
+.house-about-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.house-about-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--muted);
+}
+
+.house-about-stats {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.house-about-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 28px 24px;
+  background: var(--panel);
+}
+
+.house-about-stat-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.house-about-stat-label {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--dim);
+  text-transform: uppercase;
 }
 
 .house-cell {

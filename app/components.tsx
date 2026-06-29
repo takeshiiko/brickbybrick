@@ -11,7 +11,7 @@ const House3DViewer = dynamic(
   { ssr: false, loading: () => <div className="house-3d-loading"><span>Loading 3D model…</span></div> }
 );
 
-type Rarity = "Common" | "Uncommon" | "Rare" | "Legendary";
+type Rarity = "Common" | "Uncommon" | "Rare" | "Legendary" | "Mythic";
 
 type Brick = {
   id: number;
@@ -24,10 +24,11 @@ const TOTAL_SUPPLY = 10000;
 const mintedStart = 6428;
 
 const rarityMeta: Record<Rarity, { color: string; odds: string; supply: string }> = {
-  Common: { color: "#c8512c", odds: "78%", supply: "7,800" },
+  Common: { color: "#c8512c", odds: "77.5%", supply: "7,750" },
   Uncommon: { color: "#ef9b3b", odds: "13%", supply: "1,300" },
   Rare: { color: "#42c6e7", odds: "7%", supply: "700" },
   Legendary: { color: "#ffd84a", odds: "2%", supply: "200" },
+  Mythic: { color: "#b44fff", odds: "0.5%", supply: "50" },
 };
 
 const sampleBricks: Brick[] = [
@@ -35,8 +36,7 @@ const sampleBricks: Brick[] = [
   { id: 121, rarity: "Uncommon", type: "Window Brick", zone: "East window" },
   { id: 237, rarity: "Rare", type: "Roof Tile", zone: "Upper roof" },
   { id: 310, rarity: "Legendary", type: "Roof Peak", zone: "Final reveal marker" },
-  { id: 2057, rarity: "Common", type: "Wall Brick", zone: "Main wall" },
-  { id: 6428, rarity: "Common", type: "Wall Brick", zone: "Second floor" },
+  { id: 1, rarity: "Mythic", type: "Solana Brick", zone: "Genesis" },
 ];
 
 const rarityTypeMap: Record<Rarity, string> = {
@@ -44,6 +44,7 @@ const rarityTypeMap: Record<Rarity, string> = {
   Uncommon: "Window Brick",
   Rare: "Roof Tile",
   Legendary: "Roof Peak",
+  Mythic: "Solana Brick",
 };
 
 const numberFormatter = new Intl.NumberFormat("en-US");
@@ -495,6 +496,31 @@ function BrickThumbnail({ type, color, w=120, h=90 }: { type:string; color:strin
         ctx.stroke();
       });
     }
+    else if (type.includes("Solana")) {
+      // Mythic gradient brick
+      const BW=W*.62, BH=H*.28, D=W*.13;
+      const sx=(W-BW-D)/2, by=H*.72;
+      const grad = ctx.createLinearGradient(sx, by-BH, sx+BW, by);
+      grad.addColorStop(0, "#00ffa3");
+      grad.addColorStop(1, "#9945ff");
+      ctx.fillStyle = grad; ctx.fillRect(sx, by-BH, BW, BH);
+      ctx.beginPath(); ctx.moveTo(sx,by-BH); ctx.lineTo(sx+D,by-BH-D);
+        ctx.lineTo(sx+BW+D,by-BH-D); ctx.lineTo(sx+BW,by-BH); ctx.closePath();
+      ctx.fillStyle="rgba(200,255,230,.55)"; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(sx+BW,by-BH); ctx.lineTo(sx+BW+D,by-BH-D);
+        ctx.lineTo(sx+BW+D,by-D); ctx.lineTo(sx+BW,by); ctx.closePath();
+      ctx.fillStyle="rgba(80,0,180,.45)"; ctx.fill();
+      // hollow center
+      const hx=sx+BW*.2, hy=by-BH*.85, hw=BW*.6, hh=BH*.6;
+      ctx.clearRect(hx,hy,hw,hh);
+      ctx.strokeStyle="rgba(0,255,160,.5)"; ctx.lineWidth=1;
+      ctx.strokeRect(hx,hy,hw,hh);
+      // glow
+      ctx.shadowColor="#9945ff"; ctx.shadowBlur=14;
+      ctx.strokeStyle="rgba(153,69,255,.4)"; ctx.lineWidth=1.5;
+      ctx.strokeRect(sx+.5,by-BH+.5,BW-1,BH-1);
+      ctx.shadowBlur=0;
+    }
     else if (type.includes("Peak")) {
       // Stepped gold pyramid
       ctx.shadowColor=color; ctx.shadowBlur=18;
@@ -632,11 +658,26 @@ export function LiveHouseCanvas({
       </div>
 
       <div className="house-image-stack" style={{ position: "relative" }}>
+        {/* Progress arrows — float at viewProgress level, move with slider */}
+        {[true, false].map(isLeft => (
+          <div
+            key={isLeft ? "left" : "right"}
+            className={`progress-arrows ${isLeft ? "progress-arrows--left" : "progress-arrows--right"}`}
+            style={{
+              "--arrow-speed": `${1.8 - viewProgress * 1.2}s`,
+              "--arrow-bottom": `${18 + viewProgress * 76}%`,
+            } as React.CSSProperties}
+          >
+            {[0, 1, 2].map(i => (
+              <span key={i} className="progress-arrow" style={{ "--arrow-delay": `${i * 0.28}s` } as React.CSSProperties}>▲</span>
+            ))}
+          </div>
+        ))}
         <House3DViewer progress={viewProgress} />
         {/* Real mint progress — brick segments */}
         <div className="house-progress-overlay">
           <span className="house-progress-label">
-            {Math.round(mintProgress * 10000).toLocaleString()} / 10,000
+            {Math.round(mintProgress * 10000).toLocaleString("en-US")} / 10,000
           </span>
           <div className="brick-progress-row">
             {Array.from({ length: 20 }).map((_, i) => {
@@ -713,21 +754,6 @@ export function MintPanel() {
       </div>
       <button className="mint-cta" onClick={mint}>Mint Brick <span>· 0.05 SOL</span><i aria-hidden="true">→</i></button>
 
-      <div className="odds-heading">
-        <strong>Rarity Odds</strong>
-        <span>Odds per brick</span>
-      </div>
-      <div className="odds-grid" aria-label="Rarity odds">
-        {(Object.keys(rarityMeta) as Rarity[]).map((rarity) => {
-          return (
-            <div key={rarity}>
-              <BrickThumbnail type={rarityTypeMap[rarity]} color={rarityMeta[rarity].color} w={68} h={52} />
-              <span style={{ color: rarityMeta[rarity].color }}>{rarityMeta[rarity].odds}</span>
-              <small>{rarity}</small>
-            </div>
-          );
-        })}
-      </div>
     </aside>
   );
 }
@@ -736,8 +762,7 @@ export function DashboardMyBricks() {
   return (
     <section className="dashboard-card my-bricks-card">
       <div className="dash-card-head">
-        <h2>My Bricks</h2>
-        <Link href="/my-bricks">View all →</Link>
+        <h2>Rarity</h2>
       </div>
       <BrickGallery compact />
     </section>
@@ -788,19 +813,53 @@ export function HouseProgressPanel() {
   );
 }
 
+// Set this after Candy Machine is deployed
+const CANDY_MACHINE_ID: string | null = null;
+
+async function fetchOnChainStats(): Promise<{ volume: number | null; holders: number | null; contractAddr: string | null }> {
+  if (!CANDY_MACHINE_ID) return { volume: null, holders: null, contractAddr: null };
+  try {
+    // Helius API — replace HELIUS_API_KEY in .env.local
+    const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
+    if (!apiKey) return { volume: null, holders: null, contractAddr: CANDY_MACHINE_ID };
+    const res = await fetch(
+      `https://api.helius.xyz/v0/token-metadata?api-key=${apiKey}`,
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mintAccounts: [CANDY_MACHINE_ID] }) }
+    );
+    const data = await res.json();
+    return { volume: data?.volume ?? null, holders: data?.holderCount ?? null, contractAddr: CANDY_MACHINE_ID };
+  } catch {
+    return { volume: null, holders: null, contractAddr: CANDY_MACHINE_ID };
+  }
+}
+
 export function FooterStats() {
+  const [stats, setStats] = useState<{ volume: number | null; holders: number | null; contractAddr: string | null }>({
+    volume: null, holders: null, contractAddr: null,
+  });
+
+  useEffect(() => {
+    fetchOnChainStats().then(setStats);
+    const id = setInterval(() => fetchOnChainStats().then(setStats), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const shortAddr = stats.contractAddr
+    ? `${stats.contractAddr.slice(0, 4)}...${stats.contractAddr.slice(-4)}`
+    : "—";
+  const volumeLabel = stats.volume != null ? `${stats.volume.toLocaleString("en-US", { maximumFractionDigits: 1 })} SOL` : "—";
+  const holdersLabel = stats.holders != null ? stats.holders.toLocaleString("en-US") : "—";
+
   return (
     <footer className="footer-stats">
-      <div><span>Contract</span><strong className="footer-addr"><span className="copy-icon" />0xBbB...7421</strong></div>
-      <div><span>Total volume</span><strong>642.1 SOL</strong></div>
-      <div><span>Holders</span><strong>2,731</strong></div>
+      <div><span>Contract</span><strong className="footer-addr"><span className="copy-icon" />{shortAddr}</strong></div>
+      <div><span>Total volume</span><strong>{volumeLabel}</strong></div>
+      <div><span>Holders</span><strong>{holdersLabel}</strong></div>
       <div>
         <span>Follow</span>
-        <div className="social-icons">
-          <a href="#" className="social-icon x" aria-label="X / Twitter"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-          <a href="#" className="social-icon discord" aria-label="Discord"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></a>
-          <a href="#" className="social-icon mirror" aria-label="Mirror"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 3a9 9 0 0 1 9 9c0 2.077-.7 3.99-1.865 5.519L5.481 5.865A8.963 8.963 0 0 1 12 3zm0 18a9 9 0 0 1-9-9c0-2.077.7-3.99 1.865-5.519l13.654 13.654A8.963 8.963 0 0 1 12 21z"/></svg></a>
-        </div>
+          <div className="social-icons">
+            <a href="https://x.com/VidarBtc" target="_blank" rel="noopener noreferrer" className="social-icon x" aria-label="X / Twitter"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+          </div>
       </div>
     </footer>
   );
@@ -835,7 +894,10 @@ export function BrickCard({ brick }: { brick: Brick }) {
         <span>{brick.rarity}</span>
       </div>
       <div className="card-brick-wrap">
-        <BrickThumbnail type={brick.type} color={color} w={110} h={82} />
+        {rarityImage[brick.rarity]
+          ? <img src={rarityImage[brick.rarity]} alt={brick.type} style={{ width: 110, height: 82, objectFit: "contain" }} />
+          : <BrickThumbnail type={brick.type} color={color} w={110} h={82} />
+        }
       </div>
       <h3>{brick.type}</h3>
       <p>{brick.zone}</p>
@@ -844,7 +906,7 @@ export function BrickCard({ brick }: { brick: Brick }) {
 }
 
 export function BrickGallery({ compact = false }: { compact?: boolean }) {
-  const bricks = compact ? sampleBricks.slice(0, 4) : sampleBricks;
+  const bricks = compact ? sampleBricks.slice(0, 5) : sampleBricks;
   return (
     <div className="gallery-grid">
       {bricks.map((brick) => (
@@ -854,12 +916,19 @@ export function BrickGallery({ compact = false }: { compact?: boolean }) {
   );
 }
 
+const rarityImage: Partial<Record<Rarity, string>> = {
+  Mythic: "/bricks/mythic.png",
+};
+
 export function RarityTable() {
   return (
     <section className="rarity-table">
       {(Object.keys(rarityMeta) as Rarity[]).map((rarity) => (
         <div key={rarity}>
-          <span className="rarity-dot" style={{ background: rarityMeta[rarity].color }} />
+          {rarityImage[rarity]
+            ? <img src={rarityImage[rarity]} alt={rarity} className="rarity-thumb" />
+            : <span className="rarity-dot" style={{ background: rarityMeta[rarity].color }} />
+          }
           <strong>{rarity}</strong>
           <span>{rarityMeta[rarity].odds}</span>
           <small>{rarityMeta[rarity].supply} bricks</small>

@@ -4,3 +4,6 @@ node_modules/
 *.png.bak
 verification-*.png
 concept.html
+.vercel
+nft-output/
+.DS_Store
