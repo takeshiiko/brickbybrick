@@ -927,12 +927,17 @@ body {
 .wallet-menu-item {
   display: block;
   width: 100%;
-  padding: 10px 14px;
+  min-height: 46px;
+  padding: 0 28px;
   background: transparent;
   border: none;
   color: var(--danger);
   font: inherit;
-  text-align: left;
+  font-family: "Courier New", monospace;
+  font-size: 15px;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  text-align: center;
   cursor: pointer;
   white-space: nowrap;
 }
