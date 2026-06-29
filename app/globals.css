@@ -903,11 +903,13 @@ body {
 
 .wallet-menu {
   position: relative;
-  margin-right: 28px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
-.wallet-menu .wallet-button--connected {
-  margin-right: 0;
+.wallet-menu .wallet-button {
+  margin-right: 28px;
 }
 
 .wallet-menu-dropdown {
