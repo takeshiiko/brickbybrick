@@ -549,6 +549,19 @@ function BrickThumbnail({ type, color, w=120, h=90 }: { type:string; color:strin
 export function Shell({ children, active }: { children: React.ReactNode; active: "mint" | "bricks" | "house" }) {
   const { publicKey, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
+  const [walletMenuOpen, setWalletMenuOpen] = useState(false);
+  const walletMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!walletMenuOpen) return;
+    function onClickOutside(e: MouseEvent) {
+      if (walletMenuRef.current && !walletMenuRef.current.contains(e.target as Node)) {
+        setWalletMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [walletMenuOpen]);
   const nav = [
     {
       key: "mint", label: "Home/Mint", href: "/",
@@ -608,10 +621,28 @@ export function Shell({ children, active }: { children: React.ReactNode; active:
           ))}
         </nav>
         {publicKey ? (
-          <button className="wallet-button wallet-button--connected" onClick={disconnect}>
-            <span className="wallet-dot" />
-            {publicKey.toBase58().slice(0, 4)}...{publicKey.toBase58().slice(-4)}
-          </button>
+          <div className="wallet-menu" ref={walletMenuRef}>
+            <button
+              className="wallet-button wallet-button--connected"
+              onClick={() => setWalletMenuOpen((v) => !v)}
+            >
+              <span className="wallet-dot" />
+              {publicKey.toBase58().slice(0, 4)}...{publicKey.toBase58().slice(-4)}
+            </button>
+            {walletMenuOpen && (
+              <div className="wallet-menu-dropdown">
+                <button
+                  className="wallet-menu-item"
+                  onClick={() => {
+                    setWalletMenuOpen(false);
+                    disconnect();
+                  }}
+                >
+                  Disconnect
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
           <button className="wallet-button" onClick={() => setVisible(true)}>
             <svg width="22" height="16" viewBox="0 0 22 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
@@ -629,7 +660,7 @@ export function Shell({ children, active }: { children: React.ReactNode; active:
 }
 
 export function LiveHouseCanvas({
-  progress = 0.58,
+  progress = 0,
   animated = true,
   variant,
 }: {
