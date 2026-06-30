@@ -643,10 +643,20 @@ export function LiveHouseCanvas({
   );
 }
 
+function syncLmnftQuantity(qty: number) {
+  const input = document.querySelector("#mint-slider input[type='range']") as HTMLInputElement | null;
+  if (!input) return;
+  const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+  setter?.call(input, String(qty));
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
 export function MintPanel() {
   const [minted, setMinted] = useState(0);
   const [revealed, setRevealed] = useState<Rarity>("Common");
   const [connected, setConnected] = useState(false);
+  const [qty, setQty] = useState(1);
   const remaining = TOTAL_SUPPLY - minted;
 
   useEffect(() => {
@@ -700,7 +710,16 @@ export function MintPanel() {
           </div>
         </div>
       </div>
-      <div id="mint-slider" />
+      <div id="mint-slider" style={{ display: "none" }} />
+      <div className="qty-selector">
+        <span className="qty-label">Quantity</span>
+        <div className="qty-controls">
+          <button onClick={() => { const v = Math.max(1, qty - 1); setQty(v); syncLmnftQuantity(v); }}>−</button>
+          <span>{qty}</span>
+          <button onClick={() => { const v = Math.min(10, qty + 1); setQty(v); syncLmnftQuantity(v); }}>+</button>
+        </div>
+        <span className="qty-total">{(qty * 0.05).toFixed(2)} SOL</span>
+      </div>
       <div id="mint-button-container" />
       {connected && (
         <button className="disconnect-btn" onClick={handleDisconnect}>
