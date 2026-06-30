@@ -43,9 +43,14 @@ export function LmnftScript() {
       .then((r) => r.text())
       .then((text) => {
         // oVn throws for undefined optional accounts — fix to respect isOptional
-        const patched = text.replaceAll(
+        const p1 = text.replaceAll(
           "else if(t[r.name]===void 0)throw new Error(`Invalid arguments: ${r.name} not provided.`)",
           "else if(t[r.name]===void 0&&!r.isOptional)throw new Error(`Invalid arguments: ${r.name} not provided.`)"
+        );
+        // accountsArray throws for null/undefined optional accounts — use programId as Anchor placeholder
+        const patched = p1.replaceAll(
+          `else{let s=o,u;try{u=dM(t[o.name])}catch{throw new Error(\`Wrong input type for account "\${o.name}" in the instruction accounts object\${i!==void 0?' for instruction "'+i+'"':""}. Expected PublicKey or string.\`)}`,
+          `else{let s=o,u;if(s.isOptional&&(t[o.name]===void 0||t[o.name]===null)){u=new Us.PublicKey(n)}else{try{u=dM(t[o.name])}catch{throw new Error(\`Wrong input type for account "\${o.name}" in the instruction accounts object\${i!==void 0?' for instruction "'+i+'"':""}. Expected PublicKey or string.\`)}}}`
         );
         const blob = new Blob([patched], { type: "application/javascript" });
         const blobUrl = URL.createObjectURL(blob);
