@@ -812,26 +812,26 @@ function DonutChart({ pct = 64.28 }: { pct?: number }) {
 async function fetchMintCount(): Promise<number> {
   if (!CANDY_MACHINE_ID) return 0;
   try {
-    const rpc = process.env.NEXT_PUBLIC_HELIUS_RPC_URL || "https://api.mainnet-beta.solana.com";
+    const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
+    const rpc = apiKey
+      ? `https://mainnet.helius-rpc.com/?api-key=${apiKey}`
+      : "https://api.mainnet-beta.solana.com";
     const res = await fetch(rpc, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        jsonrpc: "2.0", id: 1, method: "getAccountInfo",
-        params: [CANDY_MACHINE_ID, { encoding: "jsonParsed" }],
+        jsonrpc: "2.0", id: 1,
+        method: "getAssetsByGroup",
+        params: {
+          groupKey: "collection",
+          groupValue: CANDY_MACHINE_ID,
+          page: 1,
+          limit: 1,
+        },
       }),
     });
     const json = await res.json();
-    // Candy Machine v3 stores itemsRedeemed at a known offset in account data
-    const data = json?.result?.value?.data;
-    if (Array.isArray(data)) {
-      const buf = Buffer.from(data[0], "base64");
-      // itemsRedeemed is a u64 at byte offset 40
-      const lo = buf.readUInt32LE(40);
-      const hi = buf.readUInt32LE(44);
-      return hi * 0x100000000 + lo;
-    }
-    return 0;
+    return json?.result?.total ?? 0;
   } catch {
     return 0;
   }
