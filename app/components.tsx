@@ -5,11 +5,6 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
-import { walletAdapterIdentity } from "@metaplex-foundation/umi-signer-wallet-adapters";
-import { mplCandyMachine, mintV2, fetchCandyMachine, safeFetchCandyGuard } from "@metaplex-foundation/mpl-candy-machine";
-import { publicKey, generateSigner, transactionBuilder, some } from "@metaplex-foundation/umi";
-import { setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
 
 const House3DViewer = dynamic(
   () => import("./house-viewer").then((m) => m.House3DViewer),
@@ -726,12 +721,8 @@ export function LiveHouseCanvas({
 export function MintPanel() {
   const [minted, setMinted] = useState(0);
   const [revealed, setRevealed] = useState<Rarity>("Common");
-  const [isRevealing, setIsRevealing] = useState(false);
-  const [mintError, setMintError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const remaining = TOTAL_SUPPLY - minted;
-  const wallet = useWallet();
-  const { setVisible } = useWalletModal();
 
   function handleQuantityChange(val: number) {
     setQuantity(val);
@@ -746,66 +737,6 @@ export function MintPanel() {
     return () => clearInterval(id);
   }, []);
 
-  async function mint() {
-    if (isRevealing) return;
-    if (!wallet.connected || !wallet.publicKey) {
-      setVisible(true);
-      return;
-    }
-    setIsRevealing(true);
-    setMintError(null);
-    try {
-      const rpc = process.env.NEXT_PUBLIC_HELIUS_RPC_URL || "https://api.mainnet-beta.solana.com";
-      const umi = createUmi(rpc).use(mplCandyMachine()).use(walletAdapterIdentity(wallet));
-
-      const candyMachine = await fetchCandyMachine(umi, publicKey(CANDY_MACHINE_ID));
-      console.log("[mint] candy machine fetched", {
-        authority: candyMachine.authority,
-        mintAuthority: candyMachine.mintAuthority,
-        itemsRedeemed: candyMachine.itemsRedeemed,
-        itemsLoaded: candyMachine.itemsLoaded,
-      });
-
-      const candyGuard = await safeFetchCandyGuard(umi, candyMachine.mintAuthority);
-      console.log("[mint] candy guard", candyGuard);
-
-      const nftMint = generateSigner(umi);
-
-      const solPayment = candyGuard?.guards.solPayment;
-      const mintArgs = solPayment && solPayment.__option === "Some"
-        ? { solPayment: some({ destination: solPayment.value.destination }) }
-        : {};
-
-      console.log("[mint] mintArgs", mintArgs);
-
-      await transactionBuilder()
-        .add(setComputeUnitLimit(umi, { units: 800_000 }))
-        .add(mintV2(umi, {
-          candyMachine: candyMachine.publicKey,
-          nftMint,
-          collectionMint: publicKey(COLLECTION_MINT_ID),
-          collectionUpdateAuthority: candyMachine.authority,
-          candyGuard: candyGuard?.publicKey,
-          mintArgs,
-        }))
-        .sendAndConfirm(umi, { confirm: { commitment: "confirmed" } });
-
-      setRevealed(pickReveal(minted + 1));
-      setMinted((v) => Math.min(TOTAL_SUPPLY, v + 1));
-    } catch (e: any) {
-      console.error("[mint] error", e);
-      const msg: string = e?.message || "";
-      if (msg.includes("funds") || msg.includes("insufficient")) {
-        setMintError("Insufficient balance. Add SOL to your wallet.");
-      } else if (msg.includes("rejected") || msg.includes("cancelled")) {
-        setMintError("Transaction rejected.");
-      } else {
-        setMintError(`Mint failed: ${msg.slice(0, 120)}`);
-      }
-    } finally {
-      setIsRevealing(false);
-    }
-  }
 
   return (
     <aside className="mint-panel">
@@ -814,11 +745,11 @@ export function MintPanel() {
           <div className="panel-heading">
             <h1>Mint a brick</h1>
           </div>
-          <button className="brick-reveal common" onClick={mint}>
+          <div className="brick-reveal common">
             <span className="mint-nft-preview" style={{ "--rarity": rarityMeta["Common"].color } as React.CSSProperties}>
               <BrickThumbnail type="Wall Brick" color={rarityMeta["Common"].color} w={250} h={190} />
             </span>
-          </button>
+          </div>
         </div>
         <div className="mint-side-stats">
           <div>
