@@ -821,7 +821,47 @@ function DonutChart({ pct = 64.28 }: { pct?: number }) {
   );
 }
 
+async function fetchMintCount(): Promise<number> {
+  if (!CANDY_MACHINE_ID) return 0;
+  try {
+    const rpc = process.env.NEXT_PUBLIC_HELIUS_RPC_URL || "https://api.mainnet-beta.solana.com";
+    const res = await fetch(rpc, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0", id: 1, method: "getAccountInfo",
+        params: [CANDY_MACHINE_ID, { encoding: "jsonParsed" }],
+      }),
+    });
+    const json = await res.json();
+    // Candy Machine v3 stores itemsRedeemed at a known offset in account data
+    const data = json?.result?.value?.data;
+    if (Array.isArray(data)) {
+      const buf = Buffer.from(data[0], "base64");
+      // itemsRedeemed is a u64 at byte offset 40
+      const lo = buf.readUInt32LE(40);
+      const hi = buf.readUInt32LE(44);
+      return hi * 0x100000000 + lo;
+    }
+    return 0;
+  } catch {
+    return 0;
+  }
+}
+
 export function HouseProgressPanel() {
+  const TOTAL = 10_000;
+  const [minted, setMinted] = useState(0);
+
+  useEffect(() => {
+    fetchMintCount().then(setMinted);
+    const id = setInterval(() => fetchMintCount().then(setMinted), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const pct = (minted / TOTAL) * 100;
+  const remaining = TOTAL - minted;
+
   return (
     <section className="dashboard-card progress-card">
       <div className="dash-card-head">
@@ -829,11 +869,11 @@ export function HouseProgressPanel() {
         <Link href="/house">Full view →</Link>
       </div>
       <div className="progress-dashboard-body">
-        <DonutChart pct={64.28} />
+        <DonutChart pct={pct} />
         <div className="progress-list">
-          <div><span className="cube-icon" /> <strong>6,428</strong><small>Bricks built</small></div>
-          <div><span className="cube-icon outline" /> <strong>3,572</strong><small>Bricks remaining</small></div>
-          <div><span className="flag-icon" /> <strong>10,000</strong><small>Total bricks</small></div>
+          <div><span className="cube-icon" /> <strong>{minted.toLocaleString("en-US")}</strong><small>Bricks built</small></div>
+          <div><span className="cube-icon outline" /> <strong>{remaining.toLocaleString("en-US")}</strong><small>Bricks remaining</small></div>
+          <div><span className="flag-icon" /> <strong>{TOTAL.toLocaleString("en-US")}</strong><small>Total bricks</small></div>
           <div className="building-up"><span>⌃⌃</span><strong>Building upward</strong><small>From foundation to roof</small></div>
         </div>
         <div className="mini-house-preview" aria-hidden="true">
