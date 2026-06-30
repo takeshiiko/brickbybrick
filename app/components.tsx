@@ -719,10 +719,16 @@ export function LiveHouseCanvas({
 }
 
 export function MintPanel() {
-  const [minted, setMinted] = useState(mintedStart);
+  const [minted, setMinted] = useState(0);
   const [revealed, setRevealed] = useState<Rarity>("Common");
   const [isRevealing, setIsRevealing] = useState(false);
   const remaining = TOTAL_SUPPLY - minted;
+
+  useEffect(() => {
+    fetchMintCount().then(setMinted);
+    const id = setInterval(() => fetchMintCount().then(setMinted), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   function mint() {
     if (isRevealing) return;
