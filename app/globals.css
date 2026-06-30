@@ -123,7 +123,7 @@ button {
 }
 
 .wallet-button {
-  justify-self: end;
+  justify-self: center;
   background: #111416;
   border-color: var(--line);
   color: var(--text);
@@ -718,9 +718,13 @@ button {
   }
 
   .nav-tabs,
-  .wallet-button,
   .brand {
     justify-self: stretch;
+  }
+
+  .wallet-button,
+  .wallet-menu {
+    justify-self: center;
   }
 
   .nav-tabs {
@@ -881,6 +885,7 @@ body {
   background: #070909;
   border-color: var(--yellow);
   border-radius: 4px;
+  justify-self: center;
 }
 
 .wallet-button--connected {
@@ -904,6 +909,7 @@ body {
 .wallet-menu {
   position: relative;
   margin-right: 28px;
+  justify-self: center;
 }
 
 .wallet-menu .wallet-button {
@@ -1786,9 +1792,13 @@ body {
   }
 
   .nav-tabs,
-  .wallet-button,
   .brand {
     justify-self: stretch;
+  }
+
+  .wallet-button,
+  .wallet-menu {
+    justify-self: center;
   }
 
   .mint-stage,
