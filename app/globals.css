@@ -2350,7 +2350,24 @@ body {
   box-sizing: border-box !important;
 }
 
-/* Limit slider track to 50% width (10 out of 20 max) */
-#mint-slider {
-  width: 50% !important;
+/* Hide LMNFT's native slider — replaced by custom slider */
+#mint-slider,
+#mint-slider-amount {
+  display: none !important;
+}
+
+.custom-qty-slider {
+  flex: 1;
+  accent-color: var(--yellow);
+  height: 4px;
+  cursor: pointer;
+}
+
+.custom-qty-amount {
+  font-family: "Courier New", monospace;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--yellow);
+  min-width: 24px;
+  text-align: right;
 }

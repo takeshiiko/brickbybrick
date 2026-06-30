@@ -728,9 +728,17 @@ export function MintPanel() {
   const [revealed, setRevealed] = useState<Rarity>("Common");
   const [isRevealing, setIsRevealing] = useState(false);
   const [mintError, setMintError] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
   const remaining = TOTAL_SUPPLY - minted;
   const wallet = useWallet();
   const { setVisible } = useWalletModal();
+
+  function handleQuantityChange(val: number) {
+    setQuantity(val);
+    if (typeof window !== "undefined" && (window as any).syncLmnftSlider) {
+      (window as any).syncLmnftSlider(val);
+    }
+  }
 
   useEffect(() => {
     fetchMintCount().then(setMinted);
@@ -829,10 +837,18 @@ export function MintPanel() {
           </div>
         </div>
       </div>
+      <div id="mint-slider" style={{ display: "none" }} />
       <div className="mint-quantity-row">
         <span>Quantity</span>
-        <div id="mint-slider" />
-        <strong id="mint-slider-amount" />
+        <input
+          type="range"
+          min={1}
+          max={10}
+          value={quantity}
+          onChange={e => handleQuantityChange(Number(e.target.value))}
+          className="custom-qty-slider"
+        />
+        <strong className="custom-qty-amount">{quantity}</strong>
       </div>
       <div id="mint-button-container" />
 

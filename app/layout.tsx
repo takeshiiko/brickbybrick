@@ -24,25 +24,15 @@ export default function RootLayout({
         <Script src="https://storage.googleapis.com/scriptslmt/0.1.3/solana.js" type="module" strategy="afterInteractive" />
         <link rel="stylesheet" href="https://storage.googleapis.com/scriptslmt/0.1.3/solana.css" />
         <Script id="lmnft-patch" strategy="afterInteractive">{`
-          const MAX_MINT = 10;
-          // Intercept pointer/mouse/touch events before MUI processes them
-          // MUI slider calculates value from click position relative to track
-          // If click is in the right (max-10)/max portion, block it
-          function blockSliderEvent(e) {
-            const slider = document.getElementById('mint-slider');
-            if (!slider || !slider.contains(e.target)) return;
-            const rail = slider.querySelector('[class*="rail"], [class*="Rail"]') || slider;
-            const rect = rail.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const pct = (clientX - rect.left) / rect.width;
-            if (pct > MAX_MINT / 20) {
-              e.stopPropagation();
-              e.preventDefault();
-            }
-          }
-          ['mousedown','pointerdown','touchstart'].forEach(ev => {
-            document.addEventListener(ev, blockSliderEvent, { capture: true, passive: false });
-          });
+          // Sync our custom slider to LMNFT's hidden MUI input
+          window.syncLmnftSlider = function(value) {
+            const lmnftInput = document.querySelector('#mint-slider input[type="range"]');
+            if (!lmnftInput) return;
+            const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+            setter.call(lmnftInput, String(value));
+            lmnftInput.dispatchEvent(new Event('input', { bubbles: true }));
+            lmnftInput.dispatchEvent(new Event('change', { bubbles: true }));
+          };
         `}</Script>
         <Providers>{children}</Providers>
       </body>
