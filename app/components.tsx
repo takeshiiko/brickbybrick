@@ -564,29 +564,12 @@ export function Shell({ children, active }: { children: React.ReactNode; active:
   }, [walletMenuOpen]);
   const nav = [
     {
-      key: "mint", label: "Home/Mint", href: "/",
+      key: "mint", label: "Mint", href: "/",
       icon: (
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" aria-hidden="true">
           <polyline points="1,9 10,1 19,9" />
           <rect x="3" y="9" width="14" height="10" rx="1" />
           <rect x="7.5" y="13" width="5" height="6" />
-        </svg>
-      ),
-    },
-    {
-      key: "bricks", label: "My Bricks", href: "/my-bricks",
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 512 512" fill="none" stroke="currentColor" strokeWidth="28" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
-          {/* isometric brick body */}
-          <polyline points="30,180 256,60 482,180 482,332 256,452 30,332 30,180" />
-          {/* top face */}
-          <line x1="30" y1="180" x2="256" y2="300" />
-          <line x1="482" y1="180" x2="256" y2="300" />
-          <line x1="256" y1="300" x2="256" y2="452" />
-          {/* three holes on top */}
-          <ellipse cx="175" cy="248" rx="38" ry="22" />
-          <ellipse cx="256" cy="210" rx="38" ry="22" />
-          <ellipse cx="337" cy="172" rx="38" ry="22" />
         </svg>
       ),
     },
