@@ -5,6 +5,11 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import { walletAdapterIdentity } from "@metaplex-foundation/umi-signer-wallet-adapters";
+import { mplCandyMachine, mintV2, fetchCandyMachine, safeFetchCandyGuard } from "@metaplex-foundation/mpl-candy-machine";
+import { publicKey, generateSigner, transactionBuilder, some } from "@metaplex-foundation/umi";
+import { setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
 
 const House3DViewer = dynamic(
   () => import("./house-viewer").then((m) => m.House3DViewer),
@@ -722,7 +727,10 @@ export function MintPanel() {
   const [minted, setMinted] = useState(0);
   const [revealed, setRevealed] = useState<Rarity>("Common");
   const [isRevealing, setIsRevealing] = useState(false);
+  const [mintError, setMintError] = useState<string | null>(null);
   const remaining = TOTAL_SUPPLY - minted;
+  const wallet = useWallet();
+  const { setVisible } = useWalletModal();
 
   useEffect(() => {
     fetchMintCount().then(setMinted);
@@ -730,14 +738,40 @@ export function MintPanel() {
     return () => clearInterval(id);
   }, []);
 
-  function mint() {
+  async function mint() {
     if (isRevealing) return;
+    if (!wallet.connected || !wallet.publicKey) {
+      setVisible(true);
+      return;
+    }
     setIsRevealing(true);
-    window.setTimeout(() => {
-      setMinted((value) => Math.min(TOTAL_SUPPLY, value + 1));
+    setMintError(null);
+    try {
+      const rpc = process.env.NEXT_PUBLIC_HELIUS_RPC_URL || "https://api.mainnet-beta.solana.com";
+      const umi = createUmi(rpc).use(mplCandyMachine()).use(walletAdapterIdentity(wallet));
+      const candyMachine = await fetchCandyMachine(umi, publicKey(CANDY_MACHINE_ID));
+      const candyGuard = await safeFetchCandyGuard(umi, candyMachine.mintAuthority);
+      const nftMint = generateSigner(umi);
+      await transactionBuilder()
+        .add(setComputeUnitLimit(umi, { units: 800_000 }))
+        .add(mintV2(umi, {
+          candyMachine: candyMachine.publicKey,
+          nftMint,
+          collectionMint: publicKey(COLLECTION_MINT_ID),
+          collectionUpdateAuthority: candyMachine.authority,
+          candyGuard: candyGuard?.publicKey,
+          mintArgs: candyGuard?.guards.solPayment?.__option === "Some"
+            ? { solPayment: some({ destination: candyGuard.guards.solPayment.value.destination }) }
+            : {},
+        }))
+        .sendAndConfirm(umi, { confirm: { commitment: "confirmed" } });
       setRevealed(pickReveal(minted + 1));
+      setMinted((v) => Math.min(TOTAL_SUPPLY, v + 1));
+    } catch (e: any) {
+      setMintError(e?.message?.includes("funds") ? "Yetersiz bakiye" : "Mint başarısız, tekrar dene");
+    } finally {
       setIsRevealing(false);
-    }, 720);
+    }
   }
 
   return (
@@ -771,7 +805,10 @@ export function MintPanel() {
           </div>
         </div>
       </div>
-      <button className="mint-cta" onClick={mint}>Mint Brick <span>· 0.05 SOL</span><i aria-hidden="true">→</i></button>
+      {mintError && <p style={{ color: "var(--danger)", textAlign: "center", fontSize: 13, margin: "4px 0 0" }}>{mintError}</p>}
+      <button className="mint-cta" onClick={mint} disabled={isRevealing}>
+        {isRevealing ? "Minting…" : "Mint Brick"} <span>· 0.05 SOL</span><i aria-hidden="true">→</i>
+      </button>
 
     </aside>
   );
@@ -873,7 +910,8 @@ export function HouseProgressPanel() {
 }
 
 // Set this after Candy Machine is deployed
-const CANDY_MACHINE_ID: string | null = "Gb7NxkiCN1s8TEX5zfv7CkWgfxFmdLVQxxdMPxcsMMvr";
+const CANDY_MACHINE_ID = "BYDjzpJyuP71zLHoRNodMEpkgffiHJAw8F6p35H7myF3";
+const COLLECTION_MINT_ID = "Gb7NxkiCN1s8TEX5zfv7CkWgfxFmdLVQxxdMPxcsMMvr";
 
 async function fetchOnChainStats(): Promise<{ volume: number | null; holders: number | null; contractAddr: string | null }> {
   if (!CANDY_MACHINE_ID) return { volume: null, holders: null, contractAddr: null };
