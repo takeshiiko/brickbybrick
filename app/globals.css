@@ -2492,3 +2492,21 @@ body {
   font-size: 12px;
   color: var(--accent);
 }
+
+#mint-slider {
+  padding: 4px 0 16px;
+  min-height: 44px;
+}
+#mint-slider .MuiSlider-root {
+  color: #ffd84a !important;
+}
+#mint-slider .MuiSlider-thumb {
+  background: #ffd84a !important;
+}
+#mint-slider .MuiSlider-track {
+  background: #ffd84a !important;
+  border-color: #ffd84a !important;
+}
+#mint-slider .MuiSlider-rail {
+  background: rgba(255,255,255,0.15) !important;
+}

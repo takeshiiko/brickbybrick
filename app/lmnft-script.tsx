@@ -47,8 +47,13 @@ export function LmnftScript() {
           "else if(t[r.name]===void 0)throw new Error(`Invalid arguments: ${r.name} not provided.`)",
           "else if(t[r.name]===void 0&&!r.isOptional)throw new Error(`Invalid arguments: ${r.name} not provided.`)"
         );
+        // Cap slider max at 10 (per-wallet limit)
+        const p2 = p1.replace(
+          "step:1,max:20,min:1",
+          "step:1,max:10,min:1"
+        );
         // accountsArray throws for null/undefined optional accounts — use programId as Anchor placeholder
-        const patched = p1.replaceAll(
+        const patched = p2.replaceAll(
           `else{let s=o,u;try{u=dM(t[o.name])}catch{throw new Error(\`Wrong input type for account "\${o.name}" in the instruction accounts object\${i!==void 0?' for instruction "'+i+'"':""}. Expected PublicKey or string.\`)}`,
           `else{let s=o,u;if(s.isOptional&&(t[o.name]===void 0||t[o.name]===null)){u=new Us.PublicKey(n)}else{try{u=dM(t[o.name])}catch{throw new Error(\`Wrong input type for account "\${o.name}" in the instruction accounts object\${i!==void 0?' for instruction "'+i+'"':""}. Expected PublicKey or string.\`)}}`
         );
