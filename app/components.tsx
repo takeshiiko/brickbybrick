@@ -749,9 +749,27 @@ export function MintPanel() {
     try {
       const rpc = process.env.NEXT_PUBLIC_HELIUS_RPC_URL || "https://api.mainnet-beta.solana.com";
       const umi = createUmi(rpc).use(mplCandyMachine()).use(walletAdapterIdentity(wallet));
+
       const candyMachine = await fetchCandyMachine(umi, publicKey(CANDY_MACHINE_ID));
+      console.log("[mint] candy machine fetched", {
+        authority: candyMachine.authority,
+        mintAuthority: candyMachine.mintAuthority,
+        itemsRedeemed: candyMachine.itemsRedeemed,
+        itemsLoaded: candyMachine.itemsLoaded,
+      });
+
       const candyGuard = await safeFetchCandyGuard(umi, candyMachine.mintAuthority);
+      console.log("[mint] candy guard", candyGuard);
+
       const nftMint = generateSigner(umi);
+
+      const solPayment = candyGuard?.guards.solPayment;
+      const mintArgs = solPayment && solPayment.__option === "Some"
+        ? { solPayment: some({ destination: solPayment.value.destination }) }
+        : {};
+
+      console.log("[mint] mintArgs", mintArgs);
+
       await transactionBuilder()
         .add(setComputeUnitLimit(umi, { units: 800_000 }))
         .add(mintV2(umi, {
@@ -760,15 +778,22 @@ export function MintPanel() {
           collectionMint: publicKey(COLLECTION_MINT_ID),
           collectionUpdateAuthority: candyMachine.authority,
           candyGuard: candyGuard?.publicKey,
-          mintArgs: candyGuard?.guards.solPayment?.__option === "Some"
-            ? { solPayment: some({ destination: candyGuard.guards.solPayment.value.destination }) }
-            : {},
+          mintArgs,
         }))
         .sendAndConfirm(umi, { confirm: { commitment: "confirmed" } });
+
       setRevealed(pickReveal(minted + 1));
       setMinted((v) => Math.min(TOTAL_SUPPLY, v + 1));
     } catch (e: any) {
-      setMintError(e?.message?.includes("funds") ? "Yetersiz bakiye" : "Mint başarısız, tekrar dene");
+      console.error("[mint] error", e);
+      const msg: string = e?.message || "";
+      if (msg.includes("funds") || msg.includes("insufficient")) {
+        setMintError("Insufficient balance. Add SOL to your wallet.");
+      } else if (msg.includes("rejected") || msg.includes("cancelled")) {
+        setMintError("Transaction rejected.");
+      } else {
+        setMintError(`Mint failed: ${msg.slice(0, 120)}`);
+      }
     } finally {
       setIsRevealing(false);
     }
@@ -800,15 +825,12 @@ export function MintPanel() {
           </div>
           <div>
             <span>Minted</span>
-            <strong className="cyan">{formatNumber(minted)}</strong>
+            <div id="mint-counter" />
             <small>/ 10,000</small>
           </div>
         </div>
       </div>
-      {mintError && <p style={{ color: "var(--danger)", textAlign: "center", fontSize: 13, margin: "4px 0 0" }}>{mintError}</p>}
-      <button className="mint-cta" onClick={mint} disabled={isRevealing}>
-        {isRevealing ? "Minting…" : "Mint Brick"} <span>· 0.05 SOL</span><i aria-hidden="true">→</i>
-      </button>
+      <div id="mint-button-container" />
 
     </aside>
   );
