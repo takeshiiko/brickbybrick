@@ -3,20 +3,26 @@ import { useEffect } from "react";
 
 export function LmnftScript() {
   useEffect(() => {
-    // Intercept Firebase callable responses to log structure and patch missing currency field
     const _fetch = window.fetch.bind(window);
     window.fetch = async function (...args: Parameters<typeof fetch>) {
       const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url ?? "";
       const res = await _fetch(...args);
 
-      if (url.includes("cloudfunctions.net") || url.includes("firebaseio.com") || url.includes("firestore.googleapis")) {
-        const clone = res.clone();
-        clone.text().then((text) => {
-          try {
-            const json = JSON.parse(text);
-            console.log("[LMNFT Firebase response]", url, JSON.stringify(json).slice(0, 500));
-          } catch {}
-        });
+      if (url.includes("getDocForEmbed")) {
+        const text = await res.text();
+        try {
+          const json = JSON.parse(text);
+          if (json?.result && json.result.currency === undefined) {
+            json.result.currency = null;
+          }
+          return new Response(JSON.stringify(json), {
+            status: res.status,
+            statusText: res.statusText,
+            headers: res.headers,
+          });
+        } catch {
+          return new Response(text, { status: res.status, statusText: res.statusText, headers: res.headers });
+        }
       }
 
       return res;
