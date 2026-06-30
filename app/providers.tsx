@@ -9,7 +9,7 @@ const SOLANA_RPC = "https://api.mainnet-beta.solana.com";
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ConnectionProvider endpoint={SOLANA_RPC}>
-      <WalletProvider wallets={[]} autoConnect={false}>
+      <WalletProvider wallets={[]} autoConnect>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
