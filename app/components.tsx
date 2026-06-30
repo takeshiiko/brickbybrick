@@ -736,7 +736,6 @@ export function MintPanel() {
 
   return (
     <aside className="mint-panel">
-      <button className="info-button" aria-label="Mint information">i</button>
       <div className="mint-stage">
         <div className="mint-brick-col">
           <div className="panel-heading">
