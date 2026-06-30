@@ -826,9 +826,13 @@ export function MintPanel() {
           <div>
             <span>Minted</span>
             <div id="mint-counter" />
-            <small>/ 10,000</small>
           </div>
         </div>
+      </div>
+      <div className="mint-quantity-row">
+        <span>Quantity</span>
+        <div id="mint-slider" />
+        <strong id="mint-slider-amount" />
       </div>
       <div id="mint-button-container" />
 

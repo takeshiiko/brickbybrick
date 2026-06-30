@@ -2274,3 +2274,69 @@ body {
   font-family: "Courier New", monospace;
   color: rgba(255,255,255,0.7);
 }
+
+/* LaunchMyNFT embed overrides */
+#mint-button-container button,
+#mint-button-container a {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 58px !important;
+  margin: 14px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--yellow) !important;
+  color: #171100 !important;
+  font-family: "Courier New", monospace !important;
+  font-size: 18px !important;
+  font-weight: 950 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  cursor: pointer !important;
+  box-shadow: inset -6px -6px 0 rgba(0,0,0,0.18), 0 16px 36px rgba(255,216,74,0.22) !important;
+  text-decoration: none !important;
+}
+
+#mint-counter {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--blueprint);
+  line-height: 1;
+}
+
+.mint-quantity-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0 4px;
+  border-top: 1px solid var(--line);
+}
+
+.mint-quantity-row > span {
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+#mint-slider {
+  flex: 1;
+  accent-color: var(--yellow);
+}
+
+#mint-slider input[type="range"] {
+  width: 100%;
+  accent-color: var(--yellow);
+}
+
+#mint-slider-amount {
+  font-family: "Courier New", monospace;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--yellow);
+  min-width: 24px;
+  text-align: right;
+}
