@@ -3,8 +3,6 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 const House3DViewer = dynamic(
   () => import("./house-viewer").then((m) => m.House3DViewer),
@@ -547,21 +545,6 @@ function BrickThumbnail({ type, color, w=120, h=90 }: { type:string; color:strin
 }
 
 export function Shell({ children, active }: { children: React.ReactNode; active: "mint" | "bricks" | "house" }) {
-  const { publicKey, disconnect } = useWallet();
-  const { setVisible } = useWalletModal();
-  const [walletMenuOpen, setWalletMenuOpen] = useState(false);
-  const walletMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!walletMenuOpen) return;
-    function onClickOutside(e: MouseEvent) {
-      if (walletMenuRef.current && !walletMenuRef.current.contains(e.target as Node)) {
-        setWalletMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
-  }, [walletMenuOpen]);
   const nav = [
     {
       key: "mint", label: "Mint", href: "/",
@@ -603,39 +586,7 @@ export function Shell({ children, active }: { children: React.ReactNode; active:
             </Link>
           ))}
         </nav>
-        {publicKey ? (
-          <div className="wallet-menu" ref={walletMenuRef}>
-            <button
-              className="wallet-button wallet-button--connected"
-              onClick={() => setWalletMenuOpen((v) => !v)}
-            >
-              <span className="wallet-dot" />
-              {publicKey.toBase58().slice(0, 4)}...{publicKey.toBase58().slice(-4)}
-            </button>
-            {walletMenuOpen && (
-              <div className="wallet-menu-dropdown">
-                <button
-                  className="wallet-menu-item"
-                  onClick={() => {
-                    setWalletMenuOpen(false);
-                    disconnect();
-                  }}
-                >
-                  Disconnect
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <button className="wallet-button" onClick={() => setVisible(true)}>
-            <svg width="22" height="16" viewBox="0 0 22 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
-              <rect x="1" y="1" width="20" height="14" rx="2" />
-              <path d="M14 8a2 2 0 1 0 4 0 2 2 0 0 0-4 0Z" />
-              <line x1="1" y1="5" x2="21" y2="5" />
-            </svg>
-            Connect Wallet
-          </button>
-        )}
+        <div />
       </header>
       {children}
     </div>
@@ -643,18 +594,22 @@ export function Shell({ children, active }: { children: React.ReactNode; active:
 }
 
 export function LiveHouseCanvas({
-  progress = 0,
   animated = true,
   variant,
 }: {
-  progress?: number;
   animated?: boolean;
   variant?: "dashboard";
 }) {
-  // viewProgress: what the 3D house shows (user can scrub freely)
-  const [viewProgress, setViewProgress] = useState(progress);
-  // mintProgress: real on-chain data (drives the brick bar)
+  const [minted, setMinted] = useState(0);
+  const progress = minted / TOTAL_SUPPLY;
+  const [viewProgress, setViewProgress] = useState(0);
   const mintProgress = Math.min(1, Math.max(0, progress));
+
+  useEffect(() => {
+    fetchMintCount().then(v => { setMinted(v); setViewProgress(v / TOTAL_SUPPLY); });
+    const id = setInterval(() => fetchMintCount().then(v => { setMinted(v); setViewProgress(v / TOTAL_SUPPLY); }), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     if (!animated) return;
