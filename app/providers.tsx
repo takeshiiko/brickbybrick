@@ -4,7 +4,7 @@ import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
-const SOLANA_RPC = process.env.NEXT_PUBLIC_HELIUS_RPC_URL || "https://api.mainnet-beta.solana.com";
+const SOLANA_RPC = "https://mainnet.helius-rpc.com/?api-key=5332a03f-b079-4625-8c12-bf90a611a85f";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
