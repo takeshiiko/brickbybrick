@@ -2349,3 +2349,8 @@ body {
   width: 100% !important;
   box-sizing: border-box !important;
 }
+
+/* Limit slider track to 50% width (10 out of 20 max) */
+#mint-slider {
+  width: 50% !important;
+}
