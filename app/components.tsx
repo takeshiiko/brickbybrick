@@ -867,7 +867,7 @@ export function HouseProgressPanel() {
 }
 
 // Set this after Candy Machine is deployed
-const CANDY_MACHINE_ID: string | null = null;
+const CANDY_MACHINE_ID: string | null = "Gb7NxkiCN1s8TEX5zfv7CkWgfxFmdLVQxxdMPxcsMMvr";
 
 async function fetchOnChainStats(): Promise<{ volume: number | null; holders: number | null; contractAddr: string | null }> {
   if (!CANDY_MACHINE_ID) return { volume: null, holders: null, contractAddr: null };
