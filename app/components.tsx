@@ -676,15 +676,8 @@ export function LiveHouseCanvas({
 export function MintPanel() {
   const [minted, setMinted] = useState(0);
   const [revealed, setRevealed] = useState<Rarity>("Common");
-  const [quantity, setQuantity] = useState(1);
+  const [mintOpen, setMintOpen] = useState(false);
   const remaining = TOTAL_SUPPLY - minted;
-
-  function handleQuantityChange(val: number) {
-    setQuantity(val);
-    if (typeof window !== "undefined" && (window as any).syncLmnftSlider) {
-      (window as any).syncLmnftSlider(val);
-    }
-  }
 
   useEffect(() => {
     fetchMintCount().then(setMinted);
@@ -723,20 +716,22 @@ export function MintPanel() {
           </div>
         </div>
       </div>
-      <div id="mint-slider" style={{ display: "none" }} />
-      <div className="mint-quantity-row">
-        <span>Quantity</span>
-        <input
-          type="range"
-          min={1}
-          max={10}
-          value={quantity}
-          onChange={e => handleQuantityChange(Number(e.target.value))}
-          className="custom-qty-slider"
-        />
-        <strong className="custom-qty-amount">{quantity}</strong>
-      </div>
-      <div id="mint-button-container" />
+      <button className="mint-cta" onClick={() => setMintOpen(true)}>
+        Mint Brick <span>· 0.05 SOL</span><i aria-hidden="true">→</i>
+      </button>
+
+      {mintOpen && (
+        <div className="mint-modal-overlay" onClick={() => setMintOpen(false)}>
+          <div className="mint-modal" onClick={e => e.stopPropagation()}>
+            <button className="mint-modal-close" onClick={() => setMintOpen(false)}>✕</button>
+            <iframe
+              src="https://www.launchmynft.io/mint/brick"
+              className="mint-modal-iframe"
+              allow="clipboard-write"
+            />
+          </div>
+        </div>
+      )}
 
     </aside>
   );
