@@ -555,7 +555,7 @@ export function Shell({ children, active }: { children: React.ReactNode; active:
           </span>
           <span className="brand-text">Brick<br />by Brick</span>
         </Link>
-        <div />
+        <p className="topbar-notice">If the collection does not sell out, all mints will be fully refunded.</p>
         <div />
       </header>
       {children}

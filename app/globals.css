@@ -2416,3 +2416,12 @@ body {
   border: none;
   display: block;
 }
+
+.topbar-notice {
+  margin: 0;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  text-align: center;
+}
