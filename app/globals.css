@@ -2425,3 +2425,21 @@ body {
   color: var(--muted);
   text-align: center;
 }
+
+.disconnect-btn {
+  margin-top: 8px;
+  width: 100%;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--muted);
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.disconnect-btn:hover {
+  border-color: rgba(255,80,80,0.5);
+  color: rgba(255,100,100,0.9);
+}

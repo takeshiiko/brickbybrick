@@ -646,6 +646,7 @@ export function LiveHouseCanvas({
 export function MintPanel() {
   const [minted, setMinted] = useState(0);
   const [revealed, setRevealed] = useState<Rarity>("Common");
+  const [connected, setConnected] = useState(false);
   const remaining = TOTAL_SUPPLY - minted;
 
   useEffect(() => {
@@ -653,6 +654,21 @@ export function MintPanel() {
     const id = setInterval(() => fetchMintCount().then(setMinted), 30_000);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    const solana = (window as any).solana;
+    if (!solana) return;
+    const check = () => setConnected(!!solana.isConnected);
+    check();
+    solana.on?.("connect", check);
+    solana.on?.("disconnect", check);
+    return () => { solana.off?.("connect", check); solana.off?.("disconnect", check); };
+  }, []);
+
+  function handleDisconnect() {
+    (window as any).solana?.disconnect();
+    setConnected(false);
+  }
 
   return (
     <aside className="mint-panel">
@@ -686,6 +702,11 @@ export function MintPanel() {
       </div>
       <div id="mint-slider" />
       <div id="mint-button-container" />
+      {connected && (
+        <button className="disconnect-btn" onClick={handleDisconnect}>
+          Disconnect wallet
+        </button>
+      )}
     </aside>
   );
 }
