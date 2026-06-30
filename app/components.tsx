@@ -545,30 +545,6 @@ function BrickThumbnail({ type, color, w=120, h=90 }: { type:string; color:strin
 }
 
 export function Shell({ children, active }: { children: React.ReactNode; active: "mint" | "bricks" | "house" }) {
-  const nav = [
-    {
-      key: "mint", label: "Mint", href: "/",
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" aria-hidden="true">
-          <polyline points="1,9 10,1 19,9" />
-          <rect x="3" y="9" width="14" height="10" rx="1" />
-          <rect x="7.5" y="13" width="5" height="6" />
-        </svg>
-      ),
-    },
-    {
-      key: "house", label: "House", href: "/house",
-      icon: (
-        <svg width="22" height="20" viewBox="0 0 22 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" aria-hidden="true">
-          <polyline points="1,9 11,1 21,9" />
-          <rect x="2" y="9" width="18" height="10" rx="1" />
-          <rect x="8" y="13" width="6" height="6" />
-          {/* chimney */}
-          <rect x="14" y="3" width="3" height="5" />
-        </svg>
-      ),
-    },
-  ];
 
   return (
     <div className="app-shell">
@@ -580,11 +556,7 @@ export function Shell({ children, active }: { children: React.ReactNode; active:
           <span className="brand-text">Brick<br />by Brick</span>
         </Link>
         <nav className="nav-tabs" aria-label="Primary navigation">
-          {nav.map((item) => (
-            <Link key={item.key} className={active === item.key ? "active" : ""} href={item.href}>
-              {item.label}
-            </Link>
-          ))}
+          <Link className="active" href="/">Mint</Link>
         </nav>
         <div />
       </header>
