@@ -41,7 +41,7 @@ export function LmnftScript() {
       .then((r) => r.text())
       .then((text) => {
         // oVn throws for undefined optional accounts — fix to respect isOptional
-        const patched = text.replace(
+        const patched = text.replaceAll(
           "else if(t[r.name]===void 0)throw new Error(`Invalid arguments: ${r.name} not provided.`)",
           "else if(t[r.name]===void 0&&!r.isOptional)throw new Error(`Invalid arguments: ${r.name} not provided.`)"
         );
