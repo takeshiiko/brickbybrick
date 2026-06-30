@@ -112,8 +112,8 @@ for (const token of shuffled) {
   const meta = {
     name: `Brick #${paddedId}`,
     symbol: "BRICK",
-    description: `A ${token.rarity.toLowerCase()} ${token.type.toLowerCase()} from the Brick by Brick collection. Together, 10,000 bricks build a real house on-chain.`,
-    seller_fee_basis_points: 500, // 5% royalty
+    description: "Every house starts with a single brick. This collection isn't about promises of utility or roadmap buzzwords. It's about building something real.",
+    seller_fee_basis_points: 200, // 2% royalty
     image: `${paddedId}.png`,
     external_url: "https://brickbybrick.xyz",
     attributes: [
