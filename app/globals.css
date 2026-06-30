@@ -2349,18 +2349,3 @@ body {
   width: 100% !important;
   box-sizing: border-box !important;
 }
-
-/* Block right half of slider (cap at 10/20 = 50%) */
-#mint-slider {
-  position: relative;
-}
-#mint-slider::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 50%;
-  height: 100%;
-  z-index: 10;
-  cursor: not-allowed;
-}

@@ -25,34 +25,24 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://storage.googleapis.com/scriptslmt/0.1.3/solana.css" />
         <Script id="lmnft-patch" strategy="afterInteractive">{`
           const MAX_MINT = 10;
-          function patchSlider() {
-            const sliderEl = document.getElementById('mint-slider');
-            if (!sliderEl) return;
-            // Find MUI slider thumb and intercept pointer events
-            const inputs = sliderEl.querySelectorAll('input[type="range"]');
-            inputs.forEach(input => {
-              input.setAttribute('max', String(MAX_MINT));
-              // Force React synthetic change
-              const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-              if (Number(input.value) > MAX_MINT) {
-                nativeInputValueSetter.call(input, String(MAX_MINT));
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-                input.dispatchEvent(new Event('change', { bubbles: true }));
-              }
-              if (!input.dataset.patched) {
-                input.dataset.patched = '1';
-                input.addEventListener('input', function() {
-                  if (Number(this.value) > MAX_MINT) {
-                    nativeInputValueSetter.call(this, String(MAX_MINT));
-                    this.dispatchEvent(new Event('input', { bubbles: true }));
-                  }
-                }, true);
-              }
-            });
+          // Intercept pointer/mouse/touch events before MUI processes them
+          // MUI slider calculates value from click position relative to track
+          // If click is in the right (max-10)/max portion, block it
+          function blockSliderEvent(e) {
+            const slider = document.getElementById('mint-slider');
+            if (!slider || !slider.contains(e.target)) return;
+            const rail = slider.querySelector('[class*="rail"], [class*="Rail"]') || slider;
+            const rect = rail.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const pct = (clientX - rect.left) / rect.width;
+            if (pct > MAX_MINT / 20) {
+              e.stopPropagation();
+              e.preventDefault();
+            }
           }
-          const observer = new MutationObserver(patchSlider);
-          observer.observe(document.body, { childList: true, subtree: true });
-          setInterval(patchSlider, 500);
+          ['mousedown','pointerdown','touchstart'].forEach(ev => {
+            document.addEventListener(ev, blockSliderEvent, { capture: true, passive: false });
+          });
         `}</Script>
         <Providers>{children}</Providers>
       </body>
