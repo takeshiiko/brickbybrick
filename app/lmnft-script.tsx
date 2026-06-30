@@ -12,8 +12,10 @@ export function LmnftScript() {
         const text = await res.text();
         try {
           const json = JSON.parse(text);
-          if (json?.result && json.result.currency === undefined) {
-            json.result.currency = null;
+          // For SOL collections, currency is absent. Anchor requires the program ID
+          // as a placeholder for absent optional accounts (signals isMut/isSigner = false).
+          if (json?.result && (json.result.currency === undefined || json.result.currency === null)) {
+            json.result.currency = "F9SixdqdmEBP5kprp2gZPZNeMmfHJRCTMFjN22dx3akf";
           }
           return new Response(JSON.stringify(json), {
             status: res.status,
