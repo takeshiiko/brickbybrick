@@ -555,9 +555,7 @@ export function Shell({ children, active }: { children: React.ReactNode; active:
           </span>
           <span className="brand-text">Brick<br />by Brick</span>
         </Link>
-        <nav className="nav-tabs" aria-label="Primary navigation">
-          <Link className="active" href="/">Mint</Link>
-        </nav>
+        <div />
         <div />
       </header>
       {children}
