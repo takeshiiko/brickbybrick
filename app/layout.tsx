@@ -23,6 +23,23 @@ export default function RootLayout({
         `}</Script>
         <Script src="https://storage.googleapis.com/scriptslmt/0.1.3/solana.js" type="module" strategy="afterInteractive" />
         <link rel="stylesheet" href="https://storage.googleapis.com/scriptslmt/0.1.3/solana.css" />
+        <Script id="lmnft-patch" strategy="afterInteractive">{`
+          const MAX_MINT = 10;
+          const observer = new MutationObserver(() => {
+            // Cap slider at 10
+            const sliderInputs = document.querySelectorAll('#mint-slider input[type="range"]');
+            sliderInputs.forEach(input => {
+              if (input.getAttribute('max') !== String(MAX_MINT)) {
+                input.setAttribute('max', String(MAX_MINT));
+                if (Number(input.value) > MAX_MINT) {
+                  input.value = String(MAX_MINT);
+                  input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+              }
+            });
+          });
+          observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+        `}</Script>
         <Providers>{children}</Providers>
       </body>
     </html>

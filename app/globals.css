@@ -2340,3 +2340,12 @@ body {
   min-width: 24px;
   text-align: right;
 }
+
+#mint-button-container {
+  width: 100%;
+}
+
+#mint-button-container > * {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
