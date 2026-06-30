@@ -891,26 +891,22 @@ function DonutChart({ pct = 64.28 }: { pct?: number }) {
 async function fetchMintCount(): Promise<number> {
   if (!CANDY_MACHINE_ID) return 0;
   try {
-    const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
-    const rpc = apiKey
-      ? `https://mainnet.helius-rpc.com/?api-key=${apiKey}`
-      : "https://api.mainnet-beta.solana.com";
+    const rpc = "https://mainnet.helius-rpc.com/?api-key=5332a03f-b079-4625-8c12-bf90a611a85f";
     const res = await fetch(rpc, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         jsonrpc: "2.0", id: 1,
-        method: "getAssetsByGroup",
-        params: {
-          groupKey: "collection",
-          groupValue: CANDY_MACHINE_ID,
-          page: 1,
-          limit: 1,
-        },
+        method: "getAccountInfo",
+        params: [CANDY_MACHINE_ID, { encoding: "base64" }],
       }),
     });
     const json = await res.json();
-    return json?.result?.total ?? 0;
+    const b64 = json?.result?.value?.data?.[0];
+    if (!b64) return 0;
+    const buf = Buffer.from(b64, "base64");
+    // LMNFT custom program: minted count at byte offset 232 (u32 LE)
+    return buf.length >= 236 ? buf.readUInt32LE(232) : 0;
   } catch {
     return 0;
   }
