@@ -8,6 +8,7 @@ export function LmnftScript() {
       const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url ?? "";
       const res = await _fetch(...args);
 
+      // Patch getDocForEmbed: inject currency:null so SOL collections work
       if (url.includes("getDocForEmbed")) {
         const text = await res.text();
         try {
@@ -23,6 +24,22 @@ export function LmnftScript() {
         } catch {
           return new Response(text, { status: res.status, statusText: res.statusText, headers: res.headers });
         }
+      }
+
+      // Patch solana.js: fix oVn to respect isOptional accounts
+      if (url.includes("scriptslmt") && url.endsWith("solana.js")) {
+        const text = await res.text();
+        // oVn throws for any undefined account, even optional ones.
+        // Fix: skip the check when r.isOptional is true.
+        const patched = text.replace(
+          "else if(t[r.name]===void 0)throw new Error(`Invalid arguments: ${r.name} not provided.`)",
+          "else if(t[r.name]===void 0&&!r.isOptional)throw new Error(`Invalid arguments: ${r.name} not provided.`)"
+        );
+        return new Response(patched, {
+          status: res.status,
+          statusText: res.statusText,
+          headers: res.headers,
+        });
       }
 
       return res;
