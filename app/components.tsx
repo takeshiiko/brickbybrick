@@ -646,7 +646,6 @@ export function LiveHouseCanvas({
 export function MintPanel() {
   const [minted, setMinted] = useState(0);
   const [revealed, setRevealed] = useState<Rarity>("Common");
-  const [mintOpen, setMintOpen] = useState(false);
   const remaining = TOTAL_SUPPLY - minted;
 
   useEffect(() => {
@@ -654,7 +653,6 @@ export function MintPanel() {
     const id = setInterval(() => fetchMintCount().then(setMinted), 30_000);
     return () => clearInterval(id);
   }, []);
-
 
   return (
     <aside className="mint-panel">
@@ -686,23 +684,8 @@ export function MintPanel() {
           </div>
         </div>
       </div>
-      <button className="mint-cta" onClick={() => setMintOpen(true)}>
-        Mint Brick <span>· 0.05 SOL</span><i aria-hidden="true">→</i>
-      </button>
-
-      {mintOpen && (
-        <div className="mint-modal-overlay" onClick={() => setMintOpen(false)}>
-          <div className="mint-modal" onClick={e => e.stopPropagation()}>
-            <button className="mint-modal-close" onClick={() => setMintOpen(false)}>✕</button>
-            <iframe
-              src="https://www.launchmynft.io/mint/brick"
-              className="mint-modal-iframe"
-              allow="clipboard-write"
-            />
-          </div>
-        </div>
-      )}
-
+      <div id="mint-slider" />
+      <div id="mint-button-container" />
     </aside>
   );
 }
