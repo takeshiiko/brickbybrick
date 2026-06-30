@@ -8,7 +8,6 @@ export function LmnftScript() {
       const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url ?? "";
       const res = await _fetch(...args);
 
-      // Patch getDocForEmbed: inject currency:null so SOL collections work
       if (url.includes("getDocForEmbed")) {
         const text = await res.text();
         try {
@@ -26,22 +25,6 @@ export function LmnftScript() {
         }
       }
 
-      // Patch solana.js: fix oVn to respect isOptional accounts
-      if (url.includes("scriptslmt") && url.endsWith("solana.js")) {
-        const text = await res.text();
-        // oVn throws for any undefined account, even optional ones.
-        // Fix: skip the check when r.isOptional is true.
-        const patched = text.replace(
-          "else if(t[r.name]===void 0)throw new Error(`Invalid arguments: ${r.name} not provided.`)",
-          "else if(t[r.name]===void 0&&!r.isOptional)throw new Error(`Invalid arguments: ${r.name} not provided.`)"
-        );
-        return new Response(patched, {
-          status: res.status,
-          statusText: res.statusText,
-          headers: res.headers,
-        });
-      }
-
       return res;
     };
 
@@ -53,10 +36,22 @@ export function LmnftScript() {
     link.href = "https://storage.googleapis.com/scriptslmt/0.1.4/solana.css";
     document.head.appendChild(link);
 
-    const script = document.createElement("script");
-    script.type = "module";
-    script.src = "https://storage.googleapis.com/scriptslmt/0.1.4/solana.js";
-    document.body.appendChild(script);
+    // Fetch solana.js manually so we can patch oVn before execution
+    _fetch("https://storage.googleapis.com/scriptslmt/0.1.4/solana.js")
+      .then((r) => r.text())
+      .then((text) => {
+        // oVn throws for undefined optional accounts — fix to respect isOptional
+        const patched = text.replace(
+          "else if(t[r.name]===void 0)throw new Error(`Invalid arguments: ${r.name} not provided.`)",
+          "else if(t[r.name]===void 0&&!r.isOptional)throw new Error(`Invalid arguments: ${r.name} not provided.`)"
+        );
+        const blob = new Blob([patched], { type: "application/javascript" });
+        const blobUrl = URL.createObjectURL(blob);
+        const script = document.createElement("script");
+        script.type = "module";
+        script.src = blobUrl;
+        document.body.appendChild(script);
+      });
   }, []);
 
   return null;
