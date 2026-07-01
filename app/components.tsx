@@ -781,7 +781,7 @@ export function HouseProgressPanel() {
     return () => clearInterval(id);
   }, []);
 
-  const pct = Math.round((minted / TOTAL) * 1000) / 10;
+  const pct = parseFloat(((minted / TOTAL) * 100).toFixed(2));
   const remaining = TOTAL - minted;
 
   return (
