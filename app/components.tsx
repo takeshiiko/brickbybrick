@@ -700,7 +700,11 @@ export function MintPanel() {
           </div>
         </div>
       </div>
-      <div id="mint-slider" />
+      <div className="mint-slider-row">
+        <span className="mint-slider-label">Quantity</span>
+        <div id="mint-slider" />
+        <div id="mint-slider-amount" />
+      </div>
       <div id="mint-button-container" />
       {connected && (
         <button className="disconnect-btn" onClick={handleDisconnect}>

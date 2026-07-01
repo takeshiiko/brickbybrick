@@ -2500,9 +2500,44 @@ body {
   color: var(--accent);
 }
 
+.mint-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0 4px;
+  border-top: 1px solid var(--line);
+}
+
+.mint-slider-label {
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.5);
+  white-space: nowrap;
+}
+
 #mint-slider {
+  flex: 1;
   padding: 4px 0 16px;
   min-height: 44px;
+}
+
+#mint-slider-amount {
+  font-family: "Courier New", monospace;
+  font-size: 18px;
+  font-weight: 900;
+  color: #ffd84a;
+  min-width: 24px;
+  text-align: right;
+}
+
+#mint-slider-amount p {
+  margin: 0;
+  color: #ffd84a !important;
+  font-family: "Courier New", monospace;
+  font-size: 18px;
+  font-weight: 900;
 }
 #mint-slider .MuiSlider-root {
   color: #ffd84a !important;
