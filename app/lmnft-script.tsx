@@ -139,8 +139,18 @@ export function LmnftScript() {
           "step:1,max:20,min:1",
           "step:1,max:10,min:1"
         );
+        // ESa creates a new div every call; reuse existing to avoid duplicate reCAPTCHA renders
+        const p3 = p2.replace(
+          "function ESa(e){let t=`fire_app_check_${e.name}`,r=document.createElement(\"div\");return r.id=t,r.style.display=\"none\",document.body.appendChild(r),t}",
+          "function ESa(e){let t=`fire_app_check_${e.name}`,r=document.getElementById(t)||document.createElement(\"div\");return r.id=t,r.style.display=\"none\",r.parentNode||document.body.appendChild(r),t}"
+        );
+        // ISa calls grecaptcha.render() which throws if already rendered — guard with widgetId check
+        const p4 = p3.replace(
+          "function ISa(e,t,r,n){let i=r.render(n,{sitekey:t,",
+          "function ISa(e,t,r,n){if(tm(e).reCAPTCHAState?.widgetId!=null)return;let i=r.render(n,{sitekey:t,"
+        );
         // accountsArray throws for null/undefined optional accounts — use programId as Anchor placeholder
-        const patched = p2.replaceAll(
+        const patched = p4.replaceAll(
           `else{let s=o,u;try{u=dM(t[o.name])}catch{throw new Error(\`Wrong input type for account "\${o.name}" in the instruction accounts object\${i!==void 0?' for instruction "'+i+'"':""}. Expected PublicKey or string.\`)}`,
           `else{let s=o,u;if(s.isOptional&&(t[o.name]===void 0||t[o.name]===null)){u=new Us.PublicKey(n)}else{try{u=dM(t[o.name])}catch{throw new Error(\`Wrong input type for account "\${o.name}" in the instruction accounts object\${i!==void 0?' for instruction "'+i+'"':""}. Expected PublicKey or string.\`)}}`
         );
