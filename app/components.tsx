@@ -644,10 +644,31 @@ export function LiveHouseCanvas({
   );
 }
 
+const WALLET_LIMIT = 10;
+
+async function fetchWalletMintedCount(walletAddress: string): Promise<number> {
+  try {
+    const res = await fetch("https://mainnet.helius-rpc.com/?api-key=5332a03f-b079-4625-8c12-bf90a611a85f", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0", id: 1,
+        method: "getAssetsByOwner",
+        params: { ownerAddress: walletAddress, grouping: ["collection", COLLECTION_MINT_ID], page: 1, limit: 50 },
+      }),
+    });
+    const json = await res.json();
+    return json?.result?.total ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
 export function MintPanel() {
   const [minted, setMinted] = useState(0);
   const [revealed, setRevealed] = useState<Rarity>("Common");
   const [connected, setConnected] = useState(false);
+  const [walletMinted, setWalletMinted] = useState<number | null>(null);
   const remaining = TOTAL_SUPPLY - minted;
 
   useEffect(() => {
@@ -659,7 +680,15 @@ export function MintPanel() {
   useEffect(() => {
     const solana = (window as any).solana;
     if (!solana) return;
-    const check = () => setConnected(!!solana.isConnected);
+    const check = () => {
+      const isConn = !!solana.isConnected;
+      setConnected(isConn);
+      if (isConn && solana.publicKey) {
+        fetchWalletMintedCount(solana.publicKey.toString()).then(setWalletMinted);
+      } else {
+        setWalletMinted(null);
+      }
+    };
     check();
     solana.on?.("connect", check);
     solana.on?.("disconnect", check);
@@ -669,7 +698,10 @@ export function MintPanel() {
   function handleDisconnect() {
     (window as any).solana?.disconnect();
     setConnected(false);
+    setWalletMinted(null);
   }
+
+  const walletRemaining = walletMinted !== null ? Math.max(0, WALLET_LIMIT - walletMinted) : null;
 
   return (
     <aside className="mint-panel">
@@ -709,6 +741,13 @@ export function MintPanel() {
         <div id="mint-slider" />
         <div id="mint-slider-amount" />
       </div>
+      {walletRemaining !== null && (
+        <p className="wallet-mint-info">
+          {walletRemaining === 0
+            ? "Wallet limit reached"
+            : `${walletMinted} minted · ${walletRemaining} remaining`}
+        </p>
+      )}
       <div id="mint-button-container" />
       {connected && (
         <button className="disconnect-btn" onClick={handleDisconnect}>

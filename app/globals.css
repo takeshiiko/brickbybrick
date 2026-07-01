@@ -2561,6 +2561,15 @@ body {
   font-style: normal;
 }
 
+.wallet-mint-info {
+  margin: 0 0 6px;
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+}
+
 #mint-slider {
   flex: 1;
   padding: 4px 0 16px;
