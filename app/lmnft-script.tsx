@@ -100,14 +100,23 @@ export function LmnftScript() {
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // After Phantom connects, dispatch wallet-adapter events so LMNFT's
-    // React context picks up the connection and shows the mint button.
+    // When Phantom connects, LMNFT's wallet adapter React context doesn't
+    // automatically update. Fix: set walletName in localStorage (adapter
+    // auto-connect key), then click LMNFT's own wallet button to re-trigger
+    // the adapter's connection flow.
     const solana = (window as any).solana;
     if (solana) {
       solana.on?.("connect", () => {
-        window.dispatchEvent(new Event("wallet-connected"));
-        // Trigger a storage event — some wallet adapters listen for this
         try { localStorage.setItem("walletName", "Phantom"); } catch {}
+        // Give LMNFT's React tree time to render, then re-click its wallet button
+        // only if the mint button hasn't appeared yet.
+        setTimeout(() => {
+          const mintBtn = document.querySelector("#mint-button-container button:not(.wallet-adapter-button-trigger)");
+          const walletBtn = document.querySelector(".wallet-adapter-button-trigger") as HTMLElement | null;
+          if (!mintBtn && walletBtn) {
+            walletBtn.click();
+          }
+        }, 800);
       });
     }
 
