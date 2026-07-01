@@ -2350,11 +2350,6 @@ body {
   box-sizing: border-box !important;
 }
 
-/* Hide LMNFT's native slider — replaced by custom slider */
-#mint-slider,
-#mint-slider-amount {
-  display: none !important;
-}
 
 .custom-qty-slider {
   flex: 1;
