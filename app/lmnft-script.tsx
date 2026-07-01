@@ -100,29 +100,29 @@ export function LmnftScript() {
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // When Phantom approves, LMNFT's React wallet context doesn't update on its
-    // own because the adapter's connect() call already resolved and the state is
-    // stuck. Fix: patch solana.js to expose select+connect globally, then call
-    // select("Phantom") → connect() so LMNFT's context picks up the publicKey.
+    // After Phantom approves, LMNFT's React adapter has a timing/readyState
+    // race that prevents the context from updating. Reliable fix: store the
+    // wallet selection and reload. On reload, LMNFT reads walletName from
+    // localStorage and silently auto-connects (no popup — site is already
+    // trusted in Phantom).
     const solana = (window as any).solana;
-    if (solana) {
+    const RELOAD_FLAG = "lmnft_phantom_reload";
+    if (solana && !sessionStorage.getItem(RELOAD_FLAG)) {
       solana.on?.("connect", () => {
-        try { localStorage.setItem("walletName", "Phantom"); } catch {}
+        // Check if Mint button already appeared (connect resolved normally)
         setTimeout(() => {
           const mintBtn = document.querySelector("#mint-button-container button:not(.wallet-adapter-button-trigger)");
-          if (mintBtn) return; // already showing Mint button
-          const sel = (window as any).__lmnftWalletSelect;
-          const conn = (window as any).__lmnftWalletConnect;
-          if (sel && conn) {
-            sel("Phantom");
-            setTimeout(() => conn().catch(() => {}), 150);
-          } else {
-            // Fallback: re-click LMNFT's own wallet button
-            const walletBtn = document.querySelector(".wallet-adapter-button-trigger") as HTMLElement | null;
-            if (walletBtn) walletBtn.click();
-          }
-        }, 600);
+          if (mintBtn) return;
+          try {
+            localStorage.setItem("walletName", JSON.stringify("Phantom"));
+            sessionStorage.setItem(RELOAD_FLAG, "1");
+          } catch {}
+          window.location.reload();
+        }, 1000);
       });
+    } else {
+      // Clear flag after reload so subsequent disconnects work normally
+      try { sessionStorage.removeItem(RELOAD_FLAG); } catch {}
     }
 
     // Fetch solana.js manually so we can patch oVn before execution
@@ -139,14 +139,8 @@ export function LmnftScript() {
           "step:1,max:20,min:1",
           "step:1,max:10,min:1"
         );
-        // Expose LMNFT's wallet select+connect functions so we can call them
-        // externally after Phantom approves, forcing the React context to update.
-        const p3 = p2.replace(
-          "return Bu.default.createElement($Ut.Provider,{value:{autoConnect:!!i,wallets:L,wallet:q,publicKey:b,connected:S,connecting:c,disconnecting:h,select:s,connect:P,disconnect:g,",
-          "window.__lmnftWalletSelect=s;window.__lmnftWalletConnect=P;return Bu.default.createElement($Ut.Provider,{value:{autoConnect:!!i,wallets:L,wallet:q,publicKey:b,connected:S,connecting:c,disconnecting:h,select:s,connect:P,disconnect:g,"
-        );
         // accountsArray throws for null/undefined optional accounts — use programId as Anchor placeholder
-        const patched = p3.replaceAll(
+        const patched = p2.replaceAll(
           `else{let s=o,u;try{u=dM(t[o.name])}catch{throw new Error(\`Wrong input type for account "\${o.name}" in the instruction accounts object\${i!==void 0?' for instruction "'+i+'"':""}. Expected PublicKey or string.\`)}`,
           `else{let s=o,u;if(s.isOptional&&(t[o.name]===void 0||t[o.name]===null)){u=new Us.PublicKey(n)}else{try{u=dM(t[o.name])}catch{throw new Error(\`Wrong input type for account "\${o.name}" in the instruction accounts object\${i!==void 0?' for instruction "'+i+'"':""}. Expected PublicKey or string.\`)}}`
         );
