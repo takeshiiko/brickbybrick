@@ -702,7 +702,10 @@ export function MintPanel() {
         </div>
       </div>
       <div className="mint-slider-row">
-        <span className="mint-slider-label">Quantity</span>
+        <span className="mint-slider-label">
+          Quantity
+          <small className="mint-slider-limit">10 per wallet</small>
+        </span>
         <div id="mint-slider" />
         <div id="mint-slider-amount" />
       </div>
