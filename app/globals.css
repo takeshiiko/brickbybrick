@@ -1911,7 +1911,7 @@ body {
   display: grid;
   grid-template-columns: 3fr 2fr;
   max-width: 1504px;
-  margin: 0 auto;
+  margin: 40px auto 0;
   height: calc(100vh - 140px);
   gap: 2px;
   background: #111;
