@@ -1,13 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const House3DViewer = dynamic(
-  () => import("./house-viewer").then((m) => m.House3DViewer),
-  { ssr: false, loading: () => <div className="house-3d-loading"><span>Loading 3D model…</span></div> }
-);
 
 type Rarity = "Common" | "Uncommon" | "Rare" | "Legendary" | "Mythic";
 
@@ -612,7 +607,7 @@ export function LiveHouseCanvas({
             ))}
           </div>
         ))}
-        <House3DViewer progress={viewProgress} />
+        <img src="/house/house-preview.png" alt="House" className="house-preview-img" />
         {/* Real mint progress — brick segments */}
         <div className="house-progress-overlay">
           <span className="house-progress-label">
