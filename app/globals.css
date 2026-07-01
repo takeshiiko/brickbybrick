@@ -2598,3 +2598,154 @@ body {
   margin-right: 8px !important;
   align-items: center !important;
 }
+
+/* ── Mobile responsive overrides ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Topbar: hide notice text, collapse to logo only */
+  .topbar {
+    grid-template-columns: 1fr auto !important;
+    min-height: 64px !important;
+  }
+
+  .topbar-notice {
+    display: none;
+  }
+
+  .brand {
+    height: 64px !important;
+    padding: 0 16px !important;
+  }
+
+  .brand-text {
+    font-size: 13px !important;
+  }
+
+  /* Main dashboard: stack canvas + mint panel vertically */
+  .home-dashboard {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Canvas house: smaller height on mobile */
+  .house-frame,
+  .dashboard-house {
+    min-height: 340px !important;
+    height: 340px !important;
+  }
+
+  .house-frame canvas {
+    min-height: 340px !important;
+    height: 340px !important;
+  }
+
+  /* Mint panel: full width, compact */
+  .mint-panel {
+    max-width: 100% !important;
+    padding: 16px !important;
+  }
+
+  .mint-stage {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .mint-brick-col {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .mint-nft-preview {
+    width: 90px !important;
+    height: 70px !important;
+    flex-shrink: 0;
+  }
+
+  .panel-heading h1 {
+    font-size: 28px !important;
+  }
+
+  .mint-side-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-left: 0 !important;
+    padding-left: 0 !important;
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+    gap: 8px;
+  }
+
+  .mint-side-stats > div {
+    border-right: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Lower dashboard: stack cards */
+  .lower-dashboard {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* House split: stack vertically */
+  .house-split {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    margin-top: 8px !important;
+  }
+
+  .house-split-panel {
+    height: 60vw !important;
+    min-height: 280px !important;
+    max-height: 420px !important;
+  }
+
+  .house-split-panel--plan {
+    height: auto !important;
+    max-height: none !important;
+    padding: 16px !important;
+  }
+
+  /* About section */
+  .house-about {
+    padding: 40px 20px 60px !important;
+  }
+
+  .house-about-inner {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+
+  /* Footer stats: 2 columns */
+  .footer-stats {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .footer-stats div {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--line) !important;
+  }
+
+  .footer-stats div:last-child,
+  .footer-stats div:nth-last-child(2) {
+    border-bottom: 0 !important;
+  }
+
+  /* Donut chart section */
+  .progress-dashboard-body {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* Slider row compact */
+  .mint-slider-row {
+    padding: 8px 0 2px !important;
+  }
+
+  /* Notifications: full width on mobile */
+  .MuiSnackbar-root {
+    right: 8px !important;
+    left: 8px !important;
+    top: 8px !important;
+  }
+}

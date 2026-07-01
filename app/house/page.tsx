@@ -1,4 +1,12 @@
+"use client";
+
+import dynamic from "next/dynamic";
 import { Shell } from "../components";
+
+const House3DViewer = dynamic(
+  () => import("../house-viewer").then((m) => m.House3DViewer),
+  { ssr: false, loading: () => <div className="house-3d-loading"><span>Loading…</span></div> }
+);
 
 export default function HousePage() {
   return (
@@ -7,7 +15,7 @@ export default function HousePage() {
         <div className="house-split">
           <div className="house-split-panel house-split-panel--3d">
             <div className="house-split-label">3D MODEL</div>
-            <img src="/house/house-preview.png" alt="House 3D Preview" className="house-preview-img" />
+            <House3DViewer progress={1} minHeight={0} autoFit />
           </div>
           <div className="house-split-panel house-split-panel--plan">
             <div className="house-split-label">FLOOR PLAN</div>

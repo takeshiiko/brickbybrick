@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
+
+const House3DViewer = dynamic(
+  () => import("./house-viewer").then((m) => m.House3DViewer),
+  { ssr: false, loading: () => <div className="house-3d-loading"><span>Loading…</span></div> }
+);
 
 
 type Rarity = "Common" | "Uncommon" | "Rare" | "Legendary" | "Mythic";
@@ -607,7 +613,7 @@ export function LiveHouseCanvas({
             ))}
           </div>
         ))}
-        <img src="/house/house-preview.png" alt="House" className="house-preview-img" />
+        <House3DViewer progress={viewProgress} />
         {/* Real mint progress — brick segments */}
         <div className="house-progress-overlay">
           <span className="house-progress-label">
@@ -783,7 +789,6 @@ export function HouseProgressPanel() {
     <section className="dashboard-card progress-card">
       <div className="dash-card-head">
         <h2>House Progress</h2>
-        <Link href="/house">Full view →</Link>
       </div>
       <div className="progress-dashboard-body">
         <DonutChart pct={pct} />
