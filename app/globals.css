@@ -2641,44 +2641,60 @@ body {
   /* Mint panel: full width, compact */
   .mint-panel {
     max-width: 100% !important;
-    padding: 16px !important;
+    padding: 14px !important;
+  }
+
+  /* Hide brick image on mobile — saves space */
+  .brick-reveal {
+    display: none !important;
   }
 
   .mint-stage {
     grid-template-columns: 1fr !important;
-    gap: 12px !important;
+    gap: 10px !important;
   }
 
   .mint-brick-col {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .mint-nft-preview {
-    width: 90px !important;
-    height: 70px !important;
-    flex-shrink: 0;
+    display: block;
   }
 
   .panel-heading h1 {
-    font-size: 28px !important;
+    font-size: 22px !important;
+    line-height: 1 !important;
   }
 
+  /* Stats: 3 columns, compact */
   .mint-side-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
     border-left: 0 !important;
     padding-left: 0 !important;
-    border-top: 1px solid var(--line);
-    padding-top: 12px;
-    gap: 8px;
+    border-top: 1px solid var(--line) !important;
+    padding-top: 10px !important;
+    gap: 4px !important;
   }
 
   .mint-side-stats > div {
     border-right: 0 !important;
     padding-right: 0 !important;
+    padding: 6px 0 !important;
+  }
+
+  .mint-side-stats span {
+    font-size: 9px !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  .mint-side-stats strong {
+    font-size: 16px !important;
+  }
+
+  .mint-side-stats small {
+    font-size: 9px !important;
+  }
+
+  #mint-counter {
+    font-size: 16px !important;
   }
 
   /* Lower dashboard: stack cards */
