@@ -16,6 +16,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preload" href="https://storage.googleapis.com/scriptslmt/0.1.4/solana.js" as="fetch" crossOrigin="anonymous" />
+        <link rel="preload" href="https://storage.googleapis.com/scriptslmt/0.1.4/solana.css" as="style" crossOrigin="anonymous" />
+      </head>
       <body>
         <LmnftScript />
         <Providers>{children}</Providers>

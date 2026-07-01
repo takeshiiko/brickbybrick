@@ -100,6 +100,17 @@ export function LmnftScript() {
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
+    // After Phantom connects, dispatch wallet-adapter events so LMNFT's
+    // React context picks up the connection and shows the mint button.
+    const solana = (window as any).solana;
+    if (solana) {
+      solana.on?.("connect", () => {
+        window.dispatchEvent(new Event("wallet-connected"));
+        // Trigger a storage event — some wallet adapters listen for this
+        try { localStorage.setItem("walletName", "Phantom"); } catch {}
+      });
+    }
+
     // Fetch solana.js manually so we can patch oVn before execution
     _fetch("https://storage.googleapis.com/scriptslmt/0.1.4/solana.js")
       .then((r) => r.text())
