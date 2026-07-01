@@ -43,53 +43,60 @@ export function LmnftScript() {
       const snackbar = document.querySelector(".MuiSnackbar-root") as HTMLElement | null;
       if (!snackbar || snackbar.dataset.themed) return;
       snackbar.dataset.themed = "1";
-
-      const alert = snackbar.querySelector(".MuiAlert-root") as HTMLElement | null;
-      const isSuccess = snackbar.querySelector(".MuiAlert-filledSuccess") !== null;
-      const msgEl = snackbar.querySelector(".MuiAlert-message");
-      const msg = msgEl?.textContent ?? (isSuccess ? "Mint successful" : "Mint failed");
-
-      // Hide original snackbar
       snackbar.style.display = "none";
 
-      // Build themed toast
-      const toast = document.createElement("div");
-      toast.style.cssText = [
-        "position:fixed",
-        "top:16px",
-        "right:16px",
-        "z-index:9999",
-        "display:flex",
-        "align-items:center",
-        "gap:10px",
-        "padding:10px 16px",
-        `background:${isSuccess ? "#0d1f0d" : "#1f0d0d"}`,
-        `border:1px solid ${isSuccess ? "rgba(100,220,74,0.4)" : "rgba(220,74,74,0.4)"}`,
-        "box-shadow:0 0 0 1px rgba(0,0,0,0.6),0 4px 20px rgba(0,0,0,0.5)",
-        "font-family:'Courier New',monospace",
-        "font-size:12px",
-        "letter-spacing:0.06em",
-        `color:${isSuccess ? "#8ddc6a" : "#dc6a6a"}`,
-        "pointer-events:none",
-        "opacity:0",
-        "transition:opacity 0.2s",
-      ].join(";");
-
-      const dot = document.createElement("span");
-      dot.style.cssText = `width:6px;height:6px;border-radius:50%;background:${isSuccess ? "#8ddc6a" : "#dc6a6a"};flex-shrink:0`;
-
-      const label = document.createElement("span");
-      label.textContent = isSuccess ? "✓ " + msg.toUpperCase() : "✕ " + msg.toUpperCase();
-
-      toast.appendChild(dot);
-      toast.appendChild(label);
-      document.body.appendChild(toast);
-
-      requestAnimationFrame(() => { toast.style.opacity = "1"; });
+      // Wait a tick for MUI to apply severity classes
       setTimeout(() => {
-        toast.style.opacity = "0";
-        setTimeout(() => toast.remove(), 300);
-      }, 3500);
+        const msgEl = snackbar.querySelector(".MuiAlert-message");
+        const msg = msgEl?.textContent ?? "";
+        const isSuccess = snackbar.querySelector(".MuiAlert-filledSuccess") !== null
+          || msg.toLowerCase().includes("success");
+
+        const bg    = isSuccess ? "rgba(10,30,14,0.97)"  : "rgba(30,10,10,0.97)";
+        const border= isSuccess ? "rgba(20,241,149,0.5)" : "rgba(255,80,80,0.5)";
+        const color = isSuccess ? "#14f195"               : "#ff5c5c";
+        const icon  = isSuccess ? "✓" : "✕";
+        const text  = msg.toUpperCase() || (isSuccess ? "MINT SUCCESS" : "MINT FAILED");
+
+        const toast = document.createElement("div");
+        toast.style.cssText = [
+          "position:fixed",
+          "top:16px",
+          "right:16px",
+          "z-index:9999",
+          "display:flex",
+          "align-items:center",
+          "gap:10px",
+          "padding:11px 18px",
+          `background:${bg}`,
+          `border:1px solid ${border}`,
+          `box-shadow:0 0 0 1px rgba(0,0,0,0.7),0 0 24px ${isSuccess ? "rgba(20,241,149,0.15)" : "rgba(255,80,80,0.15)"},0 4px 20px rgba(0,0,0,0.6)`,
+          "font-family:'Courier New',monospace",
+          "font-size:12px",
+          "letter-spacing:0.08em",
+          `color:${color}`,
+          "pointer-events:none",
+          "opacity:0",
+          "transition:opacity 0.25s",
+        ].join(";");
+
+        const iconEl = document.createElement("span");
+        iconEl.style.cssText = `font-size:14px;font-weight:bold;color:${color}`;
+        iconEl.textContent = icon;
+
+        const labelEl = document.createElement("span");
+        labelEl.textContent = text;
+
+        toast.appendChild(iconEl);
+        toast.appendChild(labelEl);
+        document.body.appendChild(toast);
+
+        requestAnimationFrame(() => { toast.style.opacity = "1"; });
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          setTimeout(() => toast.remove(), 300);
+        }, 4000);
+      }, 50);
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
