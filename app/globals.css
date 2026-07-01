@@ -2562,7 +2562,12 @@ body {
 }
 
 /* LMNFT mint notification — top-right corner */
-.MuiSnackbar-root {
+.MuiSnackbar-root,
+.MuiSnackbar-anchorOriginBottomLeft,
+.MuiSnackbar-anchorOriginBottomCenter,
+.MuiSnackbar-anchorOriginBottomRight,
+.MuiSnackbar-anchorOriginTopLeft,
+.MuiSnackbar-anchorOriginTopCenter {
   top: 16px !important;
   bottom: auto !important;
   right: 16px !important;
