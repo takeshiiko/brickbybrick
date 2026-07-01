@@ -5,7 +5,7 @@ import { LmnftScript } from "./lmnft-script";
 
 export const metadata: Metadata = {
   title: "Brick by Brick",
-  description: "Every house starts with a single brick.",
+  description: undefined,
   icons: { icon: "/icon-512.png" },
 };
 
