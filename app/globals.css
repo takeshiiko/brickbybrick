@@ -1,5 +1,5 @@
 :root {
-  --bg: #070808;
+  --bg: #06060f;
   --panel: #111416;
   --panel-strong: #171b1f;
   --line: rgba(255, 255, 255, 0.12);
@@ -27,9 +27,28 @@ html {
 body {
   margin: 0;
   color: var(--text);
-  background: #070808;
+  background-color: #06060f;
+  background-image:
+    radial-gradient(ellipse 80vw 60vh at 15% 10%, rgba(153, 69, 255, 0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 60vw 50vh at 85% 80%, rgba(20, 241, 149, 0.08) 0%, transparent 65%),
+    radial-gradient(ellipse 40vw 40vh at 60% 20%, rgba(153, 69, 255, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 50vw 30vh at 30% 90%, rgba(20, 241, 149, 0.04) 0%, transparent 60%);
+  background-attachment: fixed;
   font-family: Arial, Helvetica, sans-serif;
   letter-spacing: 0;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(153, 69, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(153, 69, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 20%, transparent 80%);
 }
 
 button,
@@ -793,10 +812,13 @@ button {
 /* Reference-matched dashboard overrides */
 body {
   font-family: Impact, "Arial Black", Arial, Helvetica, sans-serif;
+  background-color: #06060f;
 }
 
 .app-shell {
   padding: 0 12px 10px;
+  position: relative;
+  z-index: 1;
 }
 
 .topbar {
@@ -809,7 +831,9 @@ body {
   margin: 0 auto 12px;
   padding: 0;
   border-top: 0;
-  background: rgba(3, 4, 4, 0.96);
+  background: rgba(6, 6, 15, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(153, 69, 255, 0.12);
   box-shadow: 0 0 0 1px rgba(255,255,255,.03);
 }
 
@@ -994,13 +1018,13 @@ body {
 .mint-panel,
 .dashboard-card,
 .footer-stats {
-  border: 1px solid rgba(124, 146, 154, 0.32);
+  border: 1px solid rgba(153, 69, 255, 0.18);
   background:
-    linear-gradient(90deg, rgba(66,198,231,.04) 1px, transparent 1px),
-    linear-gradient(rgba(66,198,231,.03) 1px, transparent 1px),
-    linear-gradient(145deg, rgba(10, 17, 20, 0.96), rgba(4, 6, 6, 0.97));
+    linear-gradient(90deg, rgba(153,69,255,.025) 1px, transparent 1px),
+    linear-gradient(rgba(153,69,255,.02) 1px, transparent 1px),
+    linear-gradient(145deg, rgba(8, 6, 18, 0.95), rgba(4, 4, 12, 0.97));
   background-size: 14px 14px, 14px 14px, auto;
-  box-shadow: 0 0 0 1px rgba(0,0,0,.62), inset 0 0 44px rgba(66,198,231,.035);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.7), inset 0 0 40px rgba(153,69,255,.04), inset 0 0 80px rgba(20,241,149,.02);
 }
 
 /* ── Progress arrows ─────────────────────────────────────────────────────── */
