@@ -904,7 +904,7 @@ export function FooterStats() {
 
   return (
     <footer className="footer-stats">
-      <div><span>Contract</span><strong className="footer-addr"><span className="copy-icon" />{shortAddr}</strong></div>
+      <div><span>Contract</span><strong className="footer-addr" onClick={() => stats.contractAddr && navigator.clipboard.writeText(stats.contractAddr)} style={{cursor:"pointer"}} title={stats.contractAddr ?? ""}><span className="copy-icon" />{shortAddr}</strong></div>
       <div><span>Total volume</span><strong>{volumeLabel}</strong></div>
       <div><span>Holders</span><strong>{holdersLabel}</strong></div>
       <div>
