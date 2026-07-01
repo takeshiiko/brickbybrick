@@ -545,7 +545,7 @@ function BrickThumbnail({ type, color, w=120, h=90 }: { type:string; color:strin
   return <canvas ref={ref} width={w} height={h} style={{ display:"block", margin:"0 auto", imageRendering:"pixelated" }} />;
 }
 
-export function Shell({ children, active }: { children: React.ReactNode; active: "mint" | "bricks" | "house" }) {
+export function Shell({ children, active }: { children: React.ReactNode; active: "mint" | "bricks" }) {
 
   return (
     <div className="app-shell">
