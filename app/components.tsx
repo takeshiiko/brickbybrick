@@ -764,6 +764,12 @@ export function MintPanel() {
           Disconnect wallet
         </button>
       )}
+      <div className="phantom-notice">
+        <p className="phantom-notice-title">Why does Phantom show a warning?</p>
+        <p className="phantom-notice-body">
+          Phantom flags all recently registered domains as a precaution. This warning does not mean the site is unsafe — it simply means <strong>bricksolana.xyz</strong> is new. No approval or signature is requested beyond your mint transaction. You can verify the contract on-chain at any time.
+        </p>
+      </div>
     </aside>
   );
 }
