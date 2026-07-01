@@ -5,7 +5,7 @@ import { LmnftScript } from "./lmnft-script";
 
 export const metadata: Metadata = {
   title: "Brick by Brick",
-  description: "$6 brick NFT mint website with a shared live house canvas.",
+  description: "Every house starts with a single brick.",
   icons: { icon: "/icon-512.png" },
 };
 
