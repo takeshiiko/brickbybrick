@@ -38,6 +38,61 @@ export function LmnftScript() {
     link.href = "https://storage.googleapis.com/scriptslmt/0.1.4/solana.css";
     document.head.appendChild(link);
 
+    // Watch for LMNFT's MUI Snackbar and replace with themed notification
+    const observer = new MutationObserver(() => {
+      const snackbar = document.querySelector(".MuiSnackbar-root") as HTMLElement | null;
+      if (!snackbar || snackbar.dataset.themed) return;
+      snackbar.dataset.themed = "1";
+
+      const alert = snackbar.querySelector(".MuiAlert-root") as HTMLElement | null;
+      const isSuccess = snackbar.querySelector(".MuiAlert-filledSuccess") !== null;
+      const msgEl = snackbar.querySelector(".MuiAlert-message");
+      const msg = msgEl?.textContent ?? (isSuccess ? "Mint successful" : "Mint failed");
+
+      // Hide original snackbar
+      snackbar.style.display = "none";
+
+      // Build themed toast
+      const toast = document.createElement("div");
+      toast.style.cssText = [
+        "position:fixed",
+        "top:16px",
+        "right:16px",
+        "z-index:9999",
+        "display:flex",
+        "align-items:center",
+        "gap:10px",
+        "padding:10px 16px",
+        `background:${isSuccess ? "#0d1f0d" : "#1f0d0d"}`,
+        `border:1px solid ${isSuccess ? "rgba(100,220,74,0.4)" : "rgba(220,74,74,0.4)"}`,
+        "box-shadow:0 0 0 1px rgba(0,0,0,0.6),0 4px 20px rgba(0,0,0,0.5)",
+        "font-family:'Courier New',monospace",
+        "font-size:12px",
+        "letter-spacing:0.06em",
+        `color:${isSuccess ? "#8ddc6a" : "#dc6a6a"}`,
+        "pointer-events:none",
+        "opacity:0",
+        "transition:opacity 0.2s",
+      ].join(";");
+
+      const dot = document.createElement("span");
+      dot.style.cssText = `width:6px;height:6px;border-radius:50%;background:${isSuccess ? "#8ddc6a" : "#dc6a6a"};flex-shrink:0`;
+
+      const label = document.createElement("span");
+      label.textContent = isSuccess ? "✓ " + msg.toUpperCase() : "✕ " + msg.toUpperCase();
+
+      toast.appendChild(dot);
+      toast.appendChild(label);
+      document.body.appendChild(toast);
+
+      requestAnimationFrame(() => { toast.style.opacity = "1"; });
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
     // Fetch solana.js manually so we can patch oVn before execution
     _fetch("https://storage.googleapis.com/scriptslmt/0.1.4/solana.js")
       .then((r) => r.text())
