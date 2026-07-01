@@ -654,11 +654,19 @@ async function fetchWalletMintedCount(walletAddress: string): Promise<number> {
       body: JSON.stringify({
         jsonrpc: "2.0", id: 1,
         method: "getAssetsByOwner",
-        params: { ownerAddress: walletAddress, grouping: ["collection", COLLECTION_MINT_ID], page: 1, limit: 50 },
+        params: {
+          ownerAddress: walletAddress,
+          page: 1,
+          limit: 1000,
+          displayOptions: { showCollectionMetadata: false },
+        },
       }),
     });
     const json = await res.json();
-    return json?.result?.total ?? 0;
+    const items: any[] = json?.result?.items ?? [];
+    return items.filter((a: any) =>
+      a?.grouping?.some((g: any) => g.group_key === "collection" && g.group_value === COLLECTION_MINT_ID)
+    ).length;
   } catch {
     return 0;
   }
@@ -741,11 +749,13 @@ export function MintPanel() {
         <div id="mint-slider" />
         <div id="mint-slider-amount" />
       </div>
-      {walletRemaining !== null && (
+      {connected && (
         <p className="wallet-mint-info">
-          {walletRemaining === 0
-            ? "Wallet limit reached"
-            : `${walletMinted} minted · ${walletRemaining} remaining`}
+          {walletMinted === null
+            ? "Checking wallet…"
+            : walletRemaining === 0
+              ? "⚠ Wallet limit reached"
+              : `${walletMinted} minted · ${walletRemaining} remaining`}
         </p>
       )}
       <div id="mint-button-container" />
