@@ -404,9 +404,9 @@ function adj(hex: string, d: number) {
 
 const BRICK_IMAGES: Record<string, string> = {
   "Wall Brick":  "/bricks/brick2.png",
-  "Window Brick": "/bricks/brick1.png",
-  "Roof Tile":   "/bricks/brick3.png",
-  "Roof Peak":    "/bricks/brick4.png",
+  "Window Brick": "/bricks/brick4.png",
+  "Roof Tile":   "/bricks/brick1.png",
+  "Roof Peak":    "/bricks/brick3.png",
 };
 
 function BrickThumbnail({ type, color, w=120, h=90 }: { type:string; color:string; w?:number; h?:number }) {
