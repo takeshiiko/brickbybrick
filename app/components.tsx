@@ -649,10 +649,12 @@ const MINT_PRICE_ETH = 0.002;
 // Set after contract is deployed on Robinhood Chain
 const CONTRACT_ADDRESS = "";
 
+type EIP6963Provider = { info: { name: string; icon: string; uuid: string }; provider: any };
+
 function showToast(msg: string, success: boolean) {
   const bg     = success ? "rgba(10,30,14,0.97)"  : "rgba(30,10,10,0.97)";
-  const border = success ? "rgba(0,200,5,0.5)"    : "rgba(255,80,80,0.5)";
-  const color  = success ? "#00C805"               : "#ff5c5c";
+  const border = success ? "rgba(204,255,0,0.5)"  : "rgba(255,80,80,0.5)";
+  const color  = success ? "#CCFF00"               : "#ff5c5c";
   const icon   = success ? "✓" : "✕";
   const toast  = document.createElement("div");
   toast.style.cssText = [
@@ -668,25 +670,12 @@ function showToast(msg: string, success: boolean) {
   setTimeout(() => { toast.style.opacity = "0"; setTimeout(() => toast.remove(), 300); }, 4000);
 }
 
-async function connectEthWallet(): Promise<string | null> {
-  const eth = (window as any).ethereum;
-  if (!eth) { showToast("No EVM wallet found — install MetaMask", false); return null; }
-  try {
-    const accounts: string[] = await eth.request({ method: "eth_requestAccounts" });
-    return accounts[0] ?? null;
-  } catch {
-    showToast("Wallet connection rejected", false);
-    return null;
-  }
-}
-
-async function mintBricks(account: string, quantity: number): Promise<void> {
+async function mintBricks(provider: any, account: string, quantity: number): Promise<void> {
   if (!CONTRACT_ADDRESS) { showToast("Contract not deployed yet", false); return; }
-  const eth = (window as any).ethereum;
   const priceWei = BigInt(Math.round(MINT_PRICE_ETH * 1e18)) * BigInt(quantity);
   const data = "0xa0712d68" + quantity.toString(16).padStart(64, "0");
   try {
-    await eth.request({
+    await provider.request({
       method: "eth_sendTransaction",
       params: [{ from: account, to: CONTRACT_ADDRESS, value: "0x" + priceWei.toString(16), data }],
     });
@@ -696,11 +685,45 @@ async function mintBricks(account: string, quantity: number): Promise<void> {
   }
 }
 
+function WalletModal({ wallets, onSelect, onClose }: {
+  wallets: EIP6963Provider[];
+  onSelect: (w: EIP6963Provider) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="wallet-modal-backdrop" onClick={onClose}>
+      <div className="wallet-modal" onClick={e => e.stopPropagation()}>
+        <div className="wallet-modal-head">
+          <span>Select Wallet</span>
+          <button onClick={onClose}>✕</button>
+        </div>
+        {wallets.length === 0 ? (
+          <p className="wallet-modal-empty">No EVM wallet detected.<br />Install MetaMask or another wallet.</p>
+        ) : (
+          <ul className="wallet-list">
+            {wallets.map(w => (
+              <li key={w.info.uuid}>
+                <button className="wallet-item" onClick={() => onSelect(w)}>
+                  <img src={w.info.icon} width={32} height={32} alt="" />
+                  <span>{w.info.name}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function MintPanel() {
   const [minted, setMinted] = useState(0);
   const [account, setAccount] = useState<string | null>(null);
+  const [provider, setProvider] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
   const [minting, setMinting] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [wallets, setWallets] = useState<EIP6963Provider[]>([]);
   const remaining = TOTAL_SUPPLY - minted;
 
   useEffect(() => {
@@ -709,31 +732,56 @@ export function MintPanel() {
     return () => clearInterval(id);
   }, []);
 
-  // Restore wallet on page load + listen for account changes
+  // EIP-6963: discover all injected wallets
   useEffect(() => {
-    const eth = (window as any).ethereum;
-    if (!eth) return;
-    eth.request({ method: "eth_accounts" }).then((accs: string[]) => {
+    const found: EIP6963Provider[] = [];
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as EIP6963Provider;
+      if (!found.find(w => w.info.uuid === detail.info.uuid)) {
+        found.push(detail);
+        setWallets([...found]);
+      }
+    };
+    window.addEventListener("eip6963:announceProvider", handler);
+    window.dispatchEvent(new Event("eip6963:requestProvider"));
+    // fallback: window.ethereum (non-EIP-6963 wallets like older MetaMask)
+    setTimeout(() => {
+      const eth = (window as any).ethereum;
+      if (eth && found.length === 0) {
+        found.push({ info: { name: "Browser Wallet", icon: "", uuid: "legacy" }, provider: eth });
+        setWallets([...found]);
+      }
+    }, 300);
+    return () => window.removeEventListener("eip6963:announceProvider", handler);
+  }, []);
+
+  // Restore session
+  useEffect(() => {
+    if (!provider) return;
+    provider.request({ method: "eth_accounts" }).then((accs: string[]) => {
       if (accs[0]) setAccount(accs[0]);
     });
     const onChange = (accs: string[]) => setAccount(accs[0] ?? null);
-    eth.on?.("accountsChanged", onChange);
-    return () => eth.removeListener?.("accountsChanged", onChange);
-  }, []);
+    provider.on?.("accountsChanged", onChange);
+    return () => provider.removeListener?.("accountsChanged", onChange);
+  }, [provider]);
 
-  async function handleConnect() {
-    const acc = await connectEthWallet();
-    if (acc) setAccount(acc);
+  async function handleSelectWallet(w: EIP6963Provider) {
+    setShowModal(false);
+    try {
+      const accs: string[] = await w.provider.request({ method: "eth_requestAccounts" });
+      if (accs[0]) { setProvider(w.provider); setAccount(accs[0]); }
+    } catch {
+      showToast("Connection rejected", false);
+    }
   }
 
-  function handleDisconnect() {
-    setAccount(null);
-  }
+  function handleDisconnect() { setAccount(null); setProvider(null); }
 
   async function handleMint() {
-    if (!account) return;
+    if (!account || !provider) return;
     setMinting(true);
-    try { await mintBricks(account, quantity); } finally { setMinting(false); }
+    try { await mintBricks(provider, account, quantity); } finally { setMinting(false); }
   }
 
   const totalPrice = (MINT_PRICE_ETH * quantity).toFixed(4);
@@ -791,7 +839,7 @@ export function MintPanel() {
 
       <div className="mint-actions">
         {!account ? (
-          <button className="mint-connect-btn" onClick={handleConnect}>
+          <button className="mint-connect-btn" onClick={() => setShowModal(true)}>
             Connect Wallet
           </button>
         ) : (
@@ -805,6 +853,10 @@ export function MintPanel() {
           </button>
         )}
       </div>
+
+      {showModal && (
+        <WalletModal wallets={wallets} onSelect={handleSelectWallet} onClose={() => setShowModal(false)} />
+      )}
     </aside>
   );
 }
