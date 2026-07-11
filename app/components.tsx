@@ -645,38 +645,62 @@ export function LiveHouseCanvas({
 }
 
 const WALLET_LIMIT = 10;
+const MINT_PRICE_ETH = 0.002;
+// Set after contract is deployed on Robinhood Chain
+const CONTRACT_ADDRESS = "";
 
-async function fetchWalletMintedCount(walletAddress: string): Promise<number> {
+function showToast(msg: string, success: boolean) {
+  const bg     = success ? "rgba(10,30,14,0.97)"  : "rgba(30,10,10,0.97)";
+  const border = success ? "rgba(0,200,5,0.5)"    : "rgba(255,80,80,0.5)";
+  const color  = success ? "#00C805"               : "#ff5c5c";
+  const icon   = success ? "✓" : "✕";
+  const toast  = document.createElement("div");
+  toast.style.cssText = [
+    "position:fixed","top:16px","right:16px","z-index:9999",
+    "display:flex","align-items:center","gap:10px","padding:11px 18px",
+    `background:${bg}`,`border:1px solid ${border}`,
+    "font-family:'Courier New',monospace","font-size:12px","letter-spacing:0.08em",
+    `color:${color}`,"pointer-events:none","opacity:0","transition:opacity 0.25s",
+  ].join(";");
+  toast.innerHTML = `<span style="font-size:14px;font-weight:bold">${icon}</span><span>${msg.toUpperCase()}</span>`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => { toast.style.opacity = "1"; });
+  setTimeout(() => { toast.style.opacity = "0"; setTimeout(() => toast.remove(), 300); }, 4000);
+}
+
+async function connectEthWallet(): Promise<string | null> {
+  const eth = (window as any).ethereum;
+  if (!eth) { showToast("No EVM wallet found — install MetaMask", false); return null; }
   try {
-    const res = await fetch("https://mainnet.helius-rpc.com/?api-key=5332a03f-b079-4625-8c12-bf90a611a85f", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0", id: 1,
-        method: "getAssetsByOwner",
-        params: {
-          ownerAddress: walletAddress,
-          page: 1,
-          limit: 1000,
-          displayOptions: { showCollectionMetadata: false },
-        },
-      }),
-    });
-    const json = await res.json();
-    const items: any[] = json?.result?.items ?? [];
-    return items.filter((a: any) =>
-      a?.grouping?.some((g: any) => g.group_key === "collection" && g.group_value === COLLECTION_MINT_ID)
-    ).length;
+    const accounts: string[] = await eth.request({ method: "eth_requestAccounts" });
+    return accounts[0] ?? null;
   } catch {
-    return 0;
+    showToast("Wallet connection rejected", false);
+    return null;
+  }
+}
+
+async function mintBricks(account: string, quantity: number): Promise<void> {
+  if (!CONTRACT_ADDRESS) { showToast("Contract not deployed yet", false); return; }
+  const eth = (window as any).ethereum;
+  const priceWei = BigInt(Math.round(MINT_PRICE_ETH * 1e18)) * BigInt(quantity);
+  const data = "0xa0712d68" + quantity.toString(16).padStart(64, "0");
+  try {
+    await eth.request({
+      method: "eth_sendTransaction",
+      params: [{ from: account, to: CONTRACT_ADDRESS, value: "0x" + priceWei.toString(16), data }],
+    });
+    showToast("Mint submitted!", true);
+  } catch (e: any) {
+    showToast(e?.message?.slice(0, 60) ?? "Mint failed", false);
   }
 }
 
 export function MintPanel() {
   const [minted, setMinted] = useState(0);
-  const [revealed, setRevealed] = useState<Rarity>("Common");
-  const [connected, setConnected] = useState(false);
-  const [walletMinted, setWalletMinted] = useState<number | null>(null);
+  const [account, setAccount] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [minting, setMinting] = useState(false);
   const remaining = TOTAL_SUPPLY - minted;
 
   useEffect(() => {
@@ -685,31 +709,35 @@ export function MintPanel() {
     return () => clearInterval(id);
   }, []);
 
+  // Restore wallet on page load + listen for account changes
   useEffect(() => {
-    const solana = (window as any).solana;
-    if (!solana) return;
-    const check = () => {
-      const isConn = !!solana.isConnected;
-      setConnected(isConn);
-      if (isConn && solana.publicKey) {
-        fetchWalletMintedCount(solana.publicKey.toString()).then(setWalletMinted);
-      } else {
-        setWalletMinted(null);
-      }
-    };
-    check();
-    solana.on?.("connect", check);
-    solana.on?.("disconnect", check);
-    return () => { solana.off?.("connect", check); solana.off?.("disconnect", check); };
+    const eth = (window as any).ethereum;
+    if (!eth) return;
+    eth.request({ method: "eth_accounts" }).then((accs: string[]) => {
+      if (accs[0]) setAccount(accs[0]);
+    });
+    const onChange = (accs: string[]) => setAccount(accs[0] ?? null);
+    eth.on?.("accountsChanged", onChange);
+    return () => eth.removeListener?.("accountsChanged", onChange);
   }, []);
 
-  function handleDisconnect() {
-    (window as any).solana?.disconnect();
-    setConnected(false);
-    setWalletMinted(null);
+  async function handleConnect() {
+    const acc = await connectEthWallet();
+    if (acc) setAccount(acc);
   }
 
-  const walletRemaining = walletMinted !== null ? Math.max(0, WALLET_LIMIT - walletMinted) : null;
+  function handleDisconnect() {
+    setAccount(null);
+  }
+
+  async function handleMint() {
+    if (!account) return;
+    setMinting(true);
+    try { await mintBricks(account, quantity); } finally { setMinting(false); }
+  }
+
+  const totalPrice = (MINT_PRICE_ETH * quantity).toFixed(4);
+  const shortAddr = account ? `${account.slice(0, 6)}…${account.slice(-4)}` : null;
 
   return (
     <aside className="mint-panel">
@@ -737,38 +765,45 @@ export function MintPanel() {
           </div>
           <div>
             <span>Minted</span>
-            <div id="mint-counter" />
+            <strong>{formatNumber(minted)}</strong>
           </div>
         </div>
       </div>
+
       <div className="mint-slider-row">
         <span className="mint-slider-label">
           Quantity
           <small className="mint-slider-limit">10 per wallet</small>
         </span>
-        <div id="mint-slider" />
-        <div id="mint-slider-amount" />
+        <input
+          type="range" min={1} max={10} step={1} value={quantity}
+          onChange={e => setQuantity(Number(e.target.value))}
+          className="mint-range"
+        />
+        <span className="mint-qty-display">{quantity} × 0.002 = <strong>{totalPrice} ETH</strong></span>
       </div>
-      {connected && (
+
+      {account && (
         <p className="wallet-mint-info">
-          {walletMinted === null
-            ? "Checking wallet…"
-            : walletRemaining === 0
-              ? "⚠ Wallet limit reached"
-              : `${walletMinted} minted · ${walletRemaining} remaining`}
+          Connected: {shortAddr}
         </p>
       )}
-      <div id="mint-button-container" />
-      {connected && (
-        <button className="disconnect-btn" onClick={handleDisconnect}>
-          Disconnect wallet
-        </button>
-      )}
-      <div className="phantom-notice">
-        <p className="phantom-notice-title">Why does my wallet show a warning?</p>
-        <p className="phantom-notice-body">
-          Wallets flag recently registered domains as a precaution. This warning does not mean the site is unsafe — it simply means the domain is new. No approval or signature is requested beyond your mint transaction. You can verify the contract on-chain at any time.
-        </p>
+
+      <div className="mint-actions">
+        {!account ? (
+          <button className="mint-connect-btn" onClick={handleConnect}>
+            Connect Wallet
+          </button>
+        ) : (
+          <button className="mint-btn" onClick={handleMint} disabled={minting}>
+            {minting ? "Minting…" : `Mint ${quantity} Brick${quantity > 1 ? "s" : ""}`}
+          </button>
+        )}
+        {account && (
+          <button className="disconnect-btn" onClick={handleDisconnect}>
+            Disconnect
+          </button>
+        )}
       </div>
     </aside>
   );
@@ -807,27 +842,8 @@ function DonutChart({ pct = 64.28 }: { pct?: number }) {
 }
 
 async function fetchMintCount(): Promise<number> {
-  if (!CANDY_MACHINE_ID) return 0;
-  try {
-    const rpc = "https://mainnet.helius-rpc.com/?api-key=5332a03f-b079-4625-8c12-bf90a611a85f";
-    const res = await fetch(rpc, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0", id: 1,
-        method: "getAccountInfo",
-        params: [CANDY_MACHINE_ID, { encoding: "base64" }],
-      }),
-    });
-    const json = await res.json();
-    const b64 = json?.result?.value?.data?.[0];
-    if (!b64) return 0;
-    const buf = Buffer.from(b64, "base64");
-    // LMNFT custom program: minted count at byte offset 232 (u32 LE)
-    return buf.length >= 236 ? buf.readUInt32LE(232) : 0;
-  } catch {
-    return 0;
-  }
+  // Will query EVM contract once deployed
+  return 0;
 }
 
 export function HouseProgressPanel() {
@@ -864,25 +880,9 @@ export function HouseProgressPanel() {
   );
 }
 
-// Set this after Candy Machine is deployed
-const CANDY_MACHINE_ID = "BYDjzpJyuP71zLHoRNodMEpkgffiHJAw8F6p35H7myF3";
-const COLLECTION_MINT_ID = "Gb7NxkiCN1s8TEX5zfv7CkWgfxFmdLVQxxdMPxcsMMvr";
-
 async function fetchOnChainStats(): Promise<{ volume: number | null; holders: number | null; contractAddr: string | null }> {
-  if (!CANDY_MACHINE_ID) return { volume: null, holders: null, contractAddr: null };
-  try {
-    // Helius API — replace HELIUS_API_KEY in .env.local
-    const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
-    if (!apiKey) return { volume: null, holders: null, contractAddr: CANDY_MACHINE_ID };
-    const res = await fetch(
-      `https://api.helius.xyz/v0/token-metadata?api-key=${apiKey}`,
-      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mintAccounts: [CANDY_MACHINE_ID] }) }
-    );
-    const data = await res.json();
-    return { volume: data?.volume ?? null, holders: data?.holderCount ?? null, contractAddr: CANDY_MACHINE_ID };
-  } catch {
-    return { volume: null, holders: null, contractAddr: CANDY_MACHINE_ID };
-  }
+  // Will query EVM contract once deployed
+  return { volume: null, holders: null, contractAddr: CONTRACT_ADDRESS || null };
 }
 
 export function FooterStats() {
