@@ -10,7 +10,7 @@
   --brick-dark: #7e2d1d;
   --blueprint: #42c6e7;
   --yellow: #ffd84a;
-  --green: #00C805;
+  --green: #CCFF00;
   --danger: #ff5c43;
   --shadow: 0 24px 90px rgba(0, 0, 0, 0.36);
 }
@@ -29,9 +29,9 @@ body {
   color: var(--text);
   background-color: #000000;
   background-image:
-    radial-gradient(ellipse 100vw 80vh at 50% 0%, rgba(0, 200, 5, 0.22) 0%, transparent 70%),
-    radial-gradient(ellipse 70vw 50vh at 100% 100%, rgba(0, 200, 5, 0.14) 0%, transparent 65%),
-    radial-gradient(ellipse 50vw 40vh at 0% 100%, rgba(0, 200, 5, 0.10) 0%, transparent 60%);
+    radial-gradient(ellipse 100vw 80vh at 50% 0%, rgba(204, 255, 0, 0.22) 0%, transparent 70%),
+    radial-gradient(ellipse 70vw 50vh at 100% 100%, rgba(204, 255, 0, 0.14) 0%, transparent 65%),
+    radial-gradient(ellipse 50vw 40vh at 0% 100%, rgba(204, 255, 0, 0.10) 0%, transparent 60%);
   background-attachment: fixed;
   font-family: Arial, Helvetica, sans-serif;
   letter-spacing: 0;
@@ -44,8 +44,8 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(0, 200, 5, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 200, 5, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(204, 255, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(204, 255, 0, 0.05) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 20%, transparent 80%);
 }
@@ -832,7 +832,7 @@ body {
   border-top: 0;
   background: rgba(6, 6, 15, 0.92);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(0, 200, 5, 0.12);
+  border-bottom: 1px solid rgba(204, 255, 0, 0.12);
   box-shadow: 0 0 0 1px rgba(255,255,255,.03);
 }
 
@@ -1017,7 +1017,7 @@ body {
 .mint-panel,
 .dashboard-card,
 .footer-stats {
-  border: 1px solid rgba(0, 200, 5, 0.18);
+  border: 1px solid rgba(204, 255, 0, 0.18);
   background:
     linear-gradient(90deg, rgba(153,69,255,.025) 1px, transparent 1px),
     linear-gradient(rgba(153,69,255,.02) 1px, transparent 1px),
@@ -2593,7 +2593,7 @@ body {
   font-size: 9px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: rgba(0, 200, 5, 0.7);
+  color: rgba(204, 255, 0, 0.7);
   font-style: normal;
 }
 
@@ -2603,7 +2603,7 @@ body {
   font-size: 10px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: rgba(0, 200, 5, 0.6);
+  color: rgba(204, 255, 0, 0.6);
 }
 
 #mint-slider {
@@ -2856,8 +2856,8 @@ body {
   margin-top: 16px;
   padding: 12px 14px;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-top: 1px solid rgba(0, 200, 5, 0.2);
-  background: rgba(0, 200, 5, 0.04);
+  border-top: 1px solid rgba(204, 255, 0, 0.2);
+  background: rgba(204, 255, 0, 0.04);
 }
 
 .phantom-notice-title {
@@ -2867,7 +2867,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(0, 200, 5, 0.8);
+  color: rgba(204, 255, 0, 0.8);
 }
 
 .phantom-notice-body {
