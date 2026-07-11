@@ -1,5 +1,5 @@
 :root {
-  --bg: #030a03;
+  --bg: #000000;
   --panel: #111416;
   --panel-strong: #171b1f;
   --line: rgba(255, 255, 255, 0.12);
@@ -27,12 +27,11 @@ html {
 body {
   margin: 0;
   color: var(--text);
-  background-color: #020d02;
+  background-color: #000000;
   background-image:
-    radial-gradient(ellipse 90vw 70vh at 15% 10%, rgba(0, 200, 5, 0.35) 0%, transparent 70%),
-    radial-gradient(ellipse 70vw 60vh at 85% 80%, rgba(0, 200, 5, 0.28) 0%, transparent 65%),
-    radial-gradient(ellipse 50vw 50vh at 60% 20%, rgba(0, 200, 5, 0.18) 0%, transparent 60%),
-    radial-gradient(ellipse 60vw 40vh at 30% 90%, rgba(0, 200, 5, 0.14) 0%, transparent 60%);
+    radial-gradient(ellipse 100vw 80vh at 50% 0%, rgba(0, 200, 5, 0.22) 0%, transparent 70%),
+    radial-gradient(ellipse 70vw 50vh at 100% 100%, rgba(0, 200, 5, 0.14) 0%, transparent 65%),
+    radial-gradient(ellipse 50vw 40vh at 0% 100%, rgba(0, 200, 5, 0.10) 0%, transparent 60%);
   background-attachment: fixed;
   font-family: Arial, Helvetica, sans-serif;
   letter-spacing: 0;
