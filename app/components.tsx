@@ -748,7 +748,7 @@ export function MintPanel() {
           </div>
           <div className="brick-reveal common">
             <span className="mint-nft-preview" style={{ "--rarity": rarityMeta["Common"].color } as React.CSSProperties}>
-              <img src="/bricks/brick-hero.png" width={250} height={250} style={{ display: "block", margin: "0 auto", objectFit: "contain" }} alt="Brick" />
+              <img src="/bricks/brick2.png" width={250} height={250} style={{ display: "block", margin: "0 auto", objectFit: "contain" }} alt="Brick" />
             </span>
           </div>
         </div>
