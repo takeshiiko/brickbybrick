@@ -403,10 +403,10 @@ function adj(hex: string, d: number) {
 }
 
 const BRICK_IMAGES: Record<string, string> = {
-  "Wall Brick":  "/bricks/common.png",
-  "Window Brick": "/bricks/uncommon.png",
-  "Roof Tile":   "/bricks/rare.png",
-  "Roof Peak":    "/bricks/legendary.png",
+  "Wall Brick":  "/bricks/brick1.png",
+  "Window Brick": "/bricks/brick2.png",
+  "Roof Tile":   "/bricks/brick3.png",
+  "Roof Peak":    "/bricks/brick4.png",
 };
 
 function BrickThumbnail({ type, color, w=120, h=90 }: { type:string; color:string; w?:number; h?:number }) {
