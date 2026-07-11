@@ -35,7 +35,7 @@ const sampleBricks: Brick[] = [
   { id: 121, rarity: "Uncommon", type: "Window Brick", zone: "East window" },
   { id: 237, rarity: "Rare", type: "Roof Tile", zone: "Upper roof" },
   { id: 310, rarity: "Legendary", type: "Roof Peak", zone: "Final reveal marker" },
-  { id: 1, rarity: "Mythic", type: "Solana Brick", zone: "Genesis" },
+  { id: 1, rarity: "Mythic", type: "Robinhood Brick", zone: "Genesis" },
 ];
 
 const rarityTypeMap: Record<Rarity, string> = {
@@ -43,7 +43,7 @@ const rarityTypeMap: Record<Rarity, string> = {
   Uncommon: "Window Brick",
   Rare: "Roof Tile",
   Legendary: "Roof Peak",
-  Mythic: "Solana Brick",
+  Mythic: "Robinhood Brick",
 };
 
 const numberFormatter = new Intl.NumberFormat("en-US");
@@ -727,8 +727,8 @@ export function MintPanel() {
         <div className="mint-side-stats">
           <div>
             <span>Price</span>
-            <strong>0.05 SOL</strong>
-            <small>On Solana</small>
+            <strong>0.002 ETH</strong>
+            <small>On Robinhood</small>
           </div>
           <div>
             <span>Remaining Supply</span>
@@ -765,9 +765,9 @@ export function MintPanel() {
         </button>
       )}
       <div className="phantom-notice">
-        <p className="phantom-notice-title">Why does Phantom show a warning?</p>
+        <p className="phantom-notice-title">Why does my wallet show a warning?</p>
         <p className="phantom-notice-body">
-          Phantom flags all recently registered domains as a precaution. This warning does not mean the site is unsafe — it simply means <strong>bricksolana.xyz</strong> is new. No approval or signature is requested beyond your mint transaction. You can verify the contract on-chain at any time.
+          Wallets flag recently registered domains as a precaution. This warning does not mean the site is unsafe — it simply means the domain is new. No approval or signature is requested beyond your mint transaction. You can verify the contract on-chain at any time.
         </p>
       </div>
     </aside>
@@ -899,7 +899,7 @@ export function FooterStats() {
   const shortAddr = stats.contractAddr
     ? `${stats.contractAddr.slice(0, 4)}...${stats.contractAddr.slice(-4)}`
     : "—";
-  const volumeLabel = stats.volume != null ? `${stats.volume.toLocaleString("en-US", { maximumFractionDigits: 1 })} SOL` : "—";
+  const volumeLabel = stats.volume != null ? `${stats.volume.toLocaleString("en-US", { maximumFractionDigits: 4 })} ETH` : "—";
   const holdersLabel = stats.holders != null ? stats.holders.toLocaleString("en-US") : "—";
 
   return (
