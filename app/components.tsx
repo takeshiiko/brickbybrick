@@ -403,8 +403,8 @@ function adj(hex: string, d: number) {
 }
 
 const BRICK_IMAGES: Record<string, string> = {
-  "Wall Brick":  "/bricks/brick1.png",
-  "Window Brick": "/bricks/brick2.png",
+  "Wall Brick":  "/bricks/brick2.png",
+  "Window Brick": "/bricks/brick1.png",
   "Roof Tile":   "/bricks/brick3.png",
   "Roof Peak":    "/bricks/brick4.png",
 };
@@ -720,7 +720,7 @@ export function MintPanel() {
           </div>
           <div className="brick-reveal common">
             <span className="mint-nft-preview" style={{ "--rarity": rarityMeta["Common"].color } as React.CSSProperties}>
-              <BrickThumbnail type="Wall Brick" color={rarityMeta["Common"].color} w={250} h={190} />
+              <img src="/bricks/brick-hero.png" width={250} height={250} style={{ display: "block", margin: "0 auto", objectFit: "contain" }} alt="Brick" />
             </span>
           </div>
         </div>
