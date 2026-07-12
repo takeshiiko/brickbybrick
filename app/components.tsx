@@ -834,7 +834,7 @@ export function MintPanel() {
           onChange={e => setQuantity(Number(e.target.value))}
           className="mint-range"
         />
-        <span className="mint-qty-display">{quantity} × 0.002 = <strong>{totalPrice} ETH</strong></span>
+        <span className="mint-qty-display"><strong>{totalPrice} ETH</strong></span>
       </div>
 
       {account && (

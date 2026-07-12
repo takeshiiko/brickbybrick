@@ -17,7 +17,7 @@ export default function Home() {
       {/* House section */}
       <div className="house-split">
         <div className="house-split-panel house-split-panel--3d">
-          <div className="house-split-label">3D MODEL</div>
+          <div className="house-split-label">FINAL RENDER</div>
           <img src="/house/house-preview.png" alt="House 3D Preview" className="house-preview-img" />
         </div>
         <div className="house-split-panel house-split-panel--plan">
