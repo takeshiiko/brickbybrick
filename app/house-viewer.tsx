@@ -11,6 +11,7 @@ export function House3DViewer({ progress = 0.58, minHeight = 420, autoFit = fals
 
   const clipBelowRef = useRef<THREE.Plane | null>(null);
   const clipAboveRef = useRef<THREE.Plane | null>(null);
+  const progressRef  = useRef(progress);
   const frontierGroupRef = useRef<THREE.Group | null>(null);
   const minYRef = useRef(-2);
   const maxYRef = useRef(2);
@@ -48,7 +49,7 @@ export function House3DViewer({ progress = 0.58, minHeight = 420, autoFit = fals
     // Use wider FOV for tall/narrow panels so the whole house fits
     const fov = aspect < 0.9 ? 62 : 42;
     const camera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 200);
-    camera.position.set(0, 0.5, 9);
+    camera.position.set(0, 0.5, 6.5);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.8));
     const sun = new THREE.DirectionalLight(0xffffff, 1.4);
@@ -66,12 +67,15 @@ export function House3DViewer({ progress = 0.58, minHeight = 420, autoFit = fals
     controls.enableDamping = true;
     controls.dampingFactor = 0.07;
 
-    // clipBelow: keeps y <= constant
-    const clipBelow = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
+    // clipBelow: keeps y <= constant  (init far below so no seam shows before setY runs)
+    const clipBelow = new THREE.Plane(new THREE.Vector3(0, -1, 0), -100);
     // clipAbove: keeps y >= -constant
-    const clipAbove = new THREE.Plane(new THREE.Vector3(0,  1, 0), 0);
+    const clipAbove = new THREE.Plane(new THREE.Vector3(0,  1, 0),  100);
     clipBelowRef.current = clipBelow;
     clipAboveRef.current = clipAbove;
+    // Apply current progress immediately now that refs are live
+    const initY = minYRef.current + progressRef.current * (maxYRef.current - minYRef.current);
+    setY(initY);
 
     const frontierGroup = new THREE.Group();
     frontierGroupRef.current = frontierGroup;
@@ -181,6 +185,7 @@ export function House3DViewer({ progress = 0.58, minHeight = 420, autoFit = fals
   }
 
   useEffect(() => {
+    progressRef.current = progress;
     const y = minYRef.current + progress * (maxYRef.current - minYRef.current);
     setY(y);
   }, [progress]);

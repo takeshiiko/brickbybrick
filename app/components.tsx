@@ -554,10 +554,16 @@ export function Shell({ children, active }: { children: React.ReactNode; active:
           <span className="brick-logo" aria-hidden="true">
             <img src="/brick-logo.png" alt="" />
           </span>
-          <span className="brand-text">Brick<br />by Brick</span>
+          <span className="brand-text">
+            Brick<br />by Brick
+            <small>On Robinhood Chain</small>
+          </span>
         </Link>
-        <p className="topbar-notice">If the collection does not sell out, all mints will be fully refunded.</p>
-        <div />
+        <p className="topbar-notice">If the collection does not sell out, <strong>all mints will be fully refunded.</strong></p>
+        <div className="chain-badge">
+          <span className="live-dot" />
+          Robinhood Chain
+        </div>
       </header>
       {children}
     </div>
@@ -803,11 +809,11 @@ export function MintPanel() {
         <div className="mint-side-stats">
           <div>
             <span>Price</span>
-            <strong>0.002 ETH</strong>
-            <small>On Robinhood</small>
+            <strong>0.002</strong>
+            <small>ETH · Robinhood</small>
           </div>
           <div>
-            <span>Remaining Supply</span>
+            <span>Supply</span>
             <strong className="green">{formatNumber(remaining)}</strong>
             <small>/ 10,000</small>
           </div>
